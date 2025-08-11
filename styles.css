@@ -1,0 +1,175 @@
+
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background-color: #f9f9f9;
+padding: 30px;
+}
+
+h2 {
+color: #333;
+}
+
+button {
+background-color: #007bff;
+border: none;
+color: white;
+padding: 10px 16px;
+margin: 5px 0;
+font-size: 15px;
+border-radius: 5px;
+cursor: pointer;
+}
+
+button:hover {
+background-color: #0056b3;
+}
+
+table {
+border-collapse: collapse;
+width: 100%;
+margin-top: 20px;
+background-color: white;
+border-radius: 8px;
+overflow: hidden;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+th, td {
+padding: 14px 18px;
+text-align: left;
+border-bottom: 1px solid #ddd;
+}
+
+th {
+background-color: #007bff;
+color: white;
+font-weight: normal;
+text-transform: uppercase;
+font-size: 14px;
+letter-spacing: 0.5px;
+}
+
+tr:hover {
+background-color: #f1f1f1;
+}
+
+pre {
+background-color: #f0f0f0;
+padding: 15px;
+border-radius: 6px;
+max-height: 400px;
+overflow: auto;
+margin-top: 20px;
+font-size: 14px;
+color: #333;
+}
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  background-color: #f0f2f5;
+}
+
+h1 {
+  text-align: center;
+}
+
+.container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 30px;
+}
+
+.queue-list {
+  width: 45%;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+button {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+
+
+
+.popup-menu {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.25);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  color: #222;
+
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.15s ease-out;
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.popup-menu.show {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+
+.popup-menu button {
+  padding: 10px;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  color: #222;
+  font-size: 14px;
+}
+
+.popup-menu button:hover {
+  background-color: #f5f5f5;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+.parent {
+display: grid;
+grid-template-columns: repeat(9, 1fr);
+grid-template-rows: repeat(12, 1fr);
+grid-column-gap: 6px;
+grid-row-gap: 6px;
+}
+
+.div1 { grid-area: 1 / 1 / 2 / 4; }
+.div2 { grid-area: 2 / 1 / 9 / 4; }
+.div3 { grid-area: 2 / 4 / 9 / 6; }
+.div4 { grid-area: 9 / 1 / 13 / 10; }
+.div5 { grid-area: 2 / 8 / 9 / 10; }
+.div6 { grid-area: 2 / 6 / 9 / 8; }

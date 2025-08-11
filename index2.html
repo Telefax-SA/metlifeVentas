@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Script</title>
+<!-- Genesys Cloud SDK -->
+<script src="https://sdk-cdn.mypurecloud.com/javascript/227.0.0/purecloud-platform-client-v2.min.js"></script>
+<script type="text/javascript">
+// Obtain a reference to the platformClient object
+const platformClient = require('platformClient');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+
+<script src="https://cdn.jsdelivr.net/npm/just-validate@4.3.0/dist/just-validate.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+
+<style>
+  body { margin:0; padding:0; font-family: 'Roboto', sans-serif; background:#F2F2F2; }
+  .parent {
+    display:grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(12, 1fr);
+    grid-gap:6px;
+    height:100vh;
+    padding:10px;
+  }
+  .div1 { grid-area:1/1/2/4; font-size:1.5rem; font-weight:500; color:#0061A0; }
+  .div2 { grid-area:2/1/9/4; background:white; padding:15px; border-radius:8px; overflow-y:auto; }
+  .div3 { grid-area:2/4/9/6; background:white; padding:15px; border-radius:8px; }
+  .div4 { grid-area:9/1/13/10; background:white; padding:15px; border-radius:8px;}
+  .div5 { grid-area:2/8/9/10; background:white; padding:15px; border-radius:8px; }
+  .div6 { grid-area:2/6/9/8; background:white; padding:15px; border-radius:8px; }
+
+  .form-grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px 20px; }
+  .div2 .form-grid,
+  .div3 .form-grid,
+  .div5 .form-grid,
+  .div6 .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+  }
+
+  .div2 input,
+  .div2 select,
+  .div2 textarea,
+  .div3 input,
+  .div3 select,
+  .div3 textarea,
+  .div5 input,
+  .div5 select,
+  .div5 textarea,
+  .div6 input,
+  .div6 select,
+  .div6 textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #A7A8AA;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #333;
+  }
+
+  .div2 input::placeholder,
+  .div2 select,
+  .div3 input::placeholder,
+  .div3 select,
+  .div5 input::placeholder,
+  .div5 select,
+  .div6 input::placeholder,
+  .div6 select {
+    color: #75787B;
+  }
+
+  /* Botones solo en div2, div3, div5, div6 */
+  .div2 button,
+  .div3 button,
+  .div5 button,
+  .div6 button {
+    background: #008EDD;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+  }
+
+  .div2 button:hover,
+  .div3 button:hover,
+  .div5 button:hover,
+  .div6 button:hover {
+    background: #0060A2;
+  }
+
+  /* Botones especiales */
+  .div2 .btn-update,
+  .div3 .btn-update,
+  .div5 .btn-update,
+  .div6 .btn-update {
+    background: #A4CE4E;
+  }
+
+  .div2 .btn-update:hover,
+  .div3 .btn-update:hover,
+  .div5 .btn-update:hover,
+  .div6 .btn-update:hover {
+    background: #819E37;
+  }
+
+  .grid-table {
+    font-size: 0.9rem;
+  }
+
+
+  #formContainer {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    background: #f5f5f5;
+  }
+
+  #formContainer form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    margin: auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+
+  #formContainer .field-wrapper {
+    position: relative;
+    margin-bottom: 40px;
+  }
+
+  #formContainer input,
+  #formContainer select {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  #formContainer .error-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #f44336;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    margin-top: 5px;
+    z-index: 100;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  #formContainer .error-tooltip > div {
+    margin-bottom: 4px;
+  }
+
+	/* html, body {
+		margin: 0;
+		padding: 0;
+		height: 100vh;
+		overflow: hidden;
+	} */
+
+  #callback-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Alinea todo a la izquierda */
+  }
+
+  #callback-form label {
+    display: flex;
+    align-items: center; /* Centra verticalmente checkbox y texto */
+    gap: 5px; /* Espacio entre el checkbox y la palabra */
+  }
+
+</style>
+</head>
+<body>
+<div class="parent">
+  <div id="campanaTitle" class="div1">Campaña</div>
+  <div class="div2">
+    <form id="formContainer" autocomplete="off">
+    <div class="form-grid">
+
+      <div class="field-wrapper">
+        <label for="nombres">Nombres</label>
+        <input type="text" id="nombres" name="nombres" placeholder="Nombres" />
+        <div class="error-tooltip" id="nombres-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="apellidos">Apellidos</label>
+        <input type="text" id="apellidos" name="apellidos" placeholder="Apellidos" />
+        <div class="error-tooltip" id="apellidos-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="ci">Cédula de Identidad</label>
+        <input type="text" id="ci" name="ci" placeholder="C.I." />
+        <div class="error-tooltip" id="ci-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="fechaNacimiento">Fecha de nacimiento</label>
+        <input type="date" id="fechaNacimiento" name="fechaNacimiento" placeholder="Fecha de nacimiento" />
+        <div class="error-tooltip" id="fechaNacimiento-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="direccion">Dirección</label>
+        <input type="text" id="direccion" name="direccion" placeholder="Dirección" />
+        <div class="error-tooltip" id="direccion-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="departamento">Departamento</label>
+        <select id="departamento" name="departamento">
+          <option value="" disabled selected>Departamento</option>
+          <option>Artigas</option>
+          <option>Canelones</option>
+          <option>Cerro Largo</option>
+          <option>Colonia</option>
+          <option>Durazno</option>
+          <option>Flores</option>
+          <option>Florida</option>
+          <option>Lavalleja</option>
+          <option>Maldonado</option>
+          <option>Montevideo</option>
+          <option>Paysandú</option>
+          <option>Río Negro</option>
+          <option>Rivera</option>
+          <option>Rocha</option>
+          <option>Salto</option>
+          <option>San José</option>
+          <option>Soriano</option>
+          <option>Tacuarembó</option>
+          <option>Treinta y Tres</option>
+        </select>
+        <div class="error-tooltip" id="departamento-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="localidad">Localidad</label>
+        <input type="text" id="localidad" name="localidad" placeholder="Localidad" />
+        <div class="error-tooltip" id="localidad-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="codigoPostal">Código Postal</label>
+        <input type="text" id="codigoPostal" name="codigoPostal" placeholder="Código Postal" />
+        <div class="error-tooltip" id="codigoPostal-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="telefono1">Teléfono 1</label>
+        <input type="text" id="telefono1" name="telefono1" placeholder="Teléfono 1" />
+        <div class="error-tooltip" id="telefono1-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="telefono2">Teléfono 2</label>
+        <input type="text" id="telefono2" name="telefono2" placeholder="Teléfono 2" />
+        <div class="error-tooltip" id="telefono2-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="telefono3">Teléfono 3</label>
+        <input type="text" id="telefono3" name="telefono3" placeholder="Teléfono 3" />
+        <div class="error-tooltip" id="telefono3-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="telefono4">Teléfono 4</label>
+        <input type="text" id="telefono4" name="telefono4" placeholder="Teléfono 4" />
+        <div class="error-tooltip" id="telefono4-error"></div>
+      </div>
+
+      <div class="field-wrapper">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Email" />
+        <div class="error-tooltip" id="email-error"></div>
+      </div>
+    </div>
+    <button id="ventaButton" disabled>Guardar Datos</button>
+  </form>
+
+  </div>
+
+  <div class="div3">
+    <div id="gridjs-table" class="grid-table"></div>
+    <button class="btn-update" id="update-table">Actualizar Base</button>
+  </div>
+
+  <div class="div4">
+    <!-- Contenido tabla info adicional -->
+    <div id="tabla">Cargando historial</div>
+  </div>
+
+  <div class="div5">
+    <form id="wrapup-form">
+      <select id="wrapup" name="wrapup"></select>
+      <textarea id="notes" name="notas" rows="4" placeholder="Comentarios..."></textarea>
+      <button id="Tipificar" type="submit">Tipificar</button>
+      <div id="tipificarMessage"></div>
+    </form>
+  </div>
+
+  <div class="div6">
+    <form id="callback-form">
+      <input type="datetime-local" id="callback-datetime" name="callback-datetime" />
+      <label><input type="checkbox" id="checkboxOwner" name="checkboxOwner" /> Dueño</label>
+      <select id="AgenteCall" name="AgenteCallback"></select>
+      <button id ="Callback" type="submit">Agendar Callback</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const fields = {
+  nombres: {
+    element: document.getElementById('nombres'),
+    errorElement: document.getElementById('nombres-error'),
+    rules: [
+      { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      { validate: val => /^(?! ).*(?<! )$/.test(val), message: 'No se permiten espacios al inicio y al final.' },
+      { validate: val => /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]*$/.test(val), message: 'No se permiten números ni símbolos.' },
+      { validate: val => /^.{0,40}$/.test(val), message: 'El texto debe tener entre 1 y 40 caracteres' },
+    ]
+  },
+  apellidos: {
+    element: document.getElementById('apellidos'),
+    errorElement: document.getElementById('apellidos-error'),
+    rules: [
+      { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      { validate: val => /^(?! ).*(?<! )$/.test(val), message: 'No se permiten espacios al inicio y al final.' },
+      { validate: val => /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]*$/.test(val), message: 'No se permiten números ni símbolos.' },
+      { validate: val => /^.{0,40}$/.test(val), message: 'El texto debe tener entre 1 y 40 caracteres' },
+    ]
+  },
+  ci: {
+    element: document.getElementById('ci'),
+    errorElement: document.getElementById('ci-error'),
+    rules: [
+      { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      { validate: val => /^[0-9.\\-]{7,8}$/.test(val), message: 'El largo de la CI debe estar entre 7 y 8 caracteres' },
+    ]
+  },
+  fechaNacimiento: {
+    element: document.getElementById('fechaNacimiento'),
+    errorElement: document.getElementById('fechaNacimiento-error'),
+    rules: [
+      { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      
+    ]
+  },
+  direccion: {
+    element: document.getElementById('direccion'),
+    errorElement: document.getElementById('direccion-error'),
+    rules: [
+      { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      { validate: val => /^(?! ).*(?<! )$/.test(val), message: 'No se permiten espacios al inicio y al final.' },
+      { validate: val => /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 ]*$/.test(val), message: 'No se permiten símbolos.' },
+      { validate: val => /^.{0,70}$/.test(val), message: 'El texto debe tener entre 1 y 70 caracteres.' },
+    ]
+  },
+  departamento: {
+    element: document.getElementById('departamento'),
+    errorElement: document.getElementById('departamento-error'),
+    rules: [
+      { validate: val => val !== '', message: 'Seleccione un departamento.' },
+    ]
+  },
+  localidad: {
+    element: document.getElementById('localidad'),
+    errorElement: document.getElementById('localidad-error'),
+    rules: [
+      { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      { validate: val => /^.{0,70}$/.test(val), message: 'El texto debe tener entre 1 y 70 caracteres.' },
+      { validate: val => /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]*$/.test(val), message: 'No se permiten números ni simbolos.' },
+      { validate: val => /^(?! ).*(?<! )$/.test(val), message: 'No se permiten espacios al inicio y al final.' },
+    ]
+  },
+  codigoPostal: {
+    element: document.getElementById('codigoPostal'),
+    errorElement: document.getElementById('codigoPostal-error'),
+    rules: [
+      { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      { validate: val => /^[0-9]{1,6}$/.test(val), message: 'El largo del código postal debe estar entre 1 y 6 caracteres.' },
+    ]
+  },
+  telefono1: {
+    element: document.getElementById('telefono1'),
+    errorElement: document.getElementById('telefono1-error'),
+    rules: [
+      //{ validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      { validate: val => /^\d{8,10}$/.test(val), message: 'Entre 8 y 10 dígitos.' },
+    ]
+  },
+  telefono2: {
+    element: document.getElementById('telefono2'),
+    errorElement: document.getElementById('telefono2-error'),
+    rules: [
+      { validate: val => /*val === '' ||*/ /^\d{8,10}$/.test(val), message: 'Debe tener entre 8 y 10 dígitos.' },
+    ]
+  },
+  telefono3: {
+    element: document.getElementById('telefono3'),
+    errorElement: document.getElementById('telefono3-error'),
+    rules: [
+      //{ validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      { validate: val => /^\d{8,10}$/.test(val), message: 'Entre 8 y 10 dígitos.' },
+    ]
+  },
+  telefono4: {
+    element: document.getElementById('telefono4'),
+    errorElement: document.getElementById('telefono4-error'),
+    rules: [
+      { validate: val => /*val === '' ||*/ /^\d{8,10}$/.test(val), message: 'Debe tener entre 8 y 10 dígitos.' },
+    ]
+  },
+  email: {
+    element: document.getElementById('email'),
+    errorElement: document.getElementById('email-error'),
+    rules: [
+      { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      { validate: val => /^[^@]+@[^@]+\.[a-z]{2,}$/.test(val), message: 'Formato de email inválido.' },
+    ]
+  },
+};
+
+  const submitBtn = document.getElementById('ventaButton');
+
+  function validateField(field) {
+    const value = field.element.value;
+    const messages = [];
+    field.rules.forEach(rule => {
+      if (!rule.validate(value)) {
+        messages.push(rule.message);
+      }
+    });
+    field.errorElement.innerHTML = messages.map(msg => `<div>${msg}</div>`).join('');
+    field.errorElement.style.display = messages.length ? 'block' : 'none';
+    return messages.length === 0;
+  }
+
+  function validateAll() {
+    let allValid = true;
+    for (const key in fields) {
+      const valid = validateField(fields[key]);
+      if (!valid) allValid = false;
+    }
+
+    submitBtn.disabled = !allValid;
+    submitBtn.style.opacity = allValid ? "1" : "0.5";
+  }
+
+  for (const key in fields) {
+    const field = fields[key];
+    field.element.addEventListener('input', () => {
+      validateField(field);
+      validateAll();
+    });
+  }
+
+
+  // document.getElementById('formContainer').addEventListener('submit', function (e) {
+  // e.preventDefault();
+  // validator.revalidate().then(isValid => {
+  //   if (isValid) {
+  //     alert('Formulario válido. Guardando...');
+  //   } else {
+  //     alert('Hay errores en el formulario.');
+  //   }
+  //   });
+  // });
+
+  
+</script>
+<script src="pkce.js"></script>
+<script src="getHistoryCall.js"></script>
+</body>
+</html>
