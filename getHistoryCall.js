@@ -467,6 +467,7 @@ function getVentaData(){
 let PhoneNumbers = "";
 //custom_-_6e654f5a-43e2-4fce-b590-ce54d40d2ec1
 //custom_-_f83cd046-d7d0-49e2-9159-7193ef5deaf2
+777
 let contactBodyData = "";
 let contactListId = "";
 async function getContactData(contactId, campaignId){
@@ -720,10 +721,10 @@ function tipificarInCall(conversationId, participantId, communicationId, wrapupC
 }
 
 
-//custom_-_6e05c5aa-46b4-468e-a3d6-24e6768ae4c1
+//custom_-_ffc373fa-674c-4d67-a72f-f55f9daf7ac1
 async function getWrapUpCodes(divisionId) {
   let apiIntegration = new platformClient.IntegrationsApi();
-  let actionId = "custom_-_6e05c5aa-46b4-468e-a3d6-24e6768ae4c1"; 
+  let actionId = "custom_-_ffc373fa-674c-4d67-a72f-f55f9daf7ac1"; 
   let body = {"divisionId":divisionId}; 
   let opts = { 
     "flatten": true 
