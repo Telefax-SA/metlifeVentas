@@ -921,7 +921,8 @@ function procesarEvento(data) {
 
 function suscribirseATopic(userId) {
   console.log("[suscribirseATopic] Iniciando suscripción para userId:", userId);
-
+  let access_token = localStorage.getItem('access_token');
+	client.setAccessToken(access_token)
   const notificationsApi = new platformClient.NotificationsApi();
 
   // El topic debe ir entre comillas invertidas para que se evalúe la variable userId
