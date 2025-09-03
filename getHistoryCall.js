@@ -651,14 +651,15 @@ function updateContact(contactListId, contactId, body, data){
   let apiIntegration = new platformClient.IntegrationsApi();
   let actionId = "custom_-_d5ee5110-fcff-476e-a68a-00931642cd8b"; 
   let body2 = {"contactListId":contactListId,
-              "contactId":contactId,
+              "contactId":contactId, 
+              "body":JSON.stringify(body),
               "data":JSON.stringify(data)
             }; 
 
   let opts = { 
     "flatten": false 
   };
-  console.error("BODY 2: " + JSON.stringify(body2));
+  console.error("BODY 2: " + JSON.stringify(body2))
   apiIntegration.postIntegrationsActionExecute(actionId, body2, opts)
   .then((data) => {
     console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
