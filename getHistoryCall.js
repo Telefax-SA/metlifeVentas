@@ -406,7 +406,7 @@ function createCallbackGateway(){
 
   const checkboxOwner = document.getElementById("checkboxOwner");
 
-  if (!checkboxOwner.checked) {
+  if (checkboxOwner.checked) {
     const dropDown = document.getElementById("AgenteCall");
     userId = dropDown.value;
     userName = dropDown.options[dropDown.selectedIndex].text;
