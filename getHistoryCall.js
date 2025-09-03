@@ -886,7 +886,7 @@ function habilitarBoton(estado) {
 function procesarEvento(data) {
   if (!data.eventBody || !data.eventBody.participants) {
     console.warn("Mensaje sin eventBody o participants");
-    habilitarBoton(false);
+    //habilitarBoton(false);
     return;
   }
 
