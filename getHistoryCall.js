@@ -790,11 +790,12 @@ async function getUsersByDivision(divisionName) {
   });
 }
 
-//custom_-_eda7f4c4-6fda-4a26-ae0c-b4d80c9b8e3c
+//custom_-_481cda10-d01f-4a47-aba0-3a68d78296bf
 function createCallback(userId, userName, queueId, scheduleTime, scriptId, callbackNumbers, campaignId, contactId, contactName, conversationId, participantId){
   let apiIntegration = new platformClient.IntegrationsApi();
 
-  let actionId = "custom_-_eda7f4c4-6fda-4a26-ae0c-b4d80c9b8e3c"; 
+  let checkbox = document.getElementById("checkboxOwner")
+  let actionId = "custom_-_481cda10-d01f-4a47-aba0-3a68d78296bf"; 
   let opts = { 
     "flatten": false 
   };
@@ -809,7 +810,8 @@ function createCallback(userId, userName, queueId, scheduleTime, scriptId, callb
     "contactId": contactId,
     "contactName": contactName,
     "conversationId": conversationId,
-    "participantId": participantId
+    "participantId": participantId,
+    "userOwner": checkbox.checked
   };
 
   apiIntegration.postIntegrationsActionExecute(actionId, body, opts)
