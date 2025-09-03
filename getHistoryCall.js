@@ -380,6 +380,7 @@ document.getElementById('Tipificar').onclick = (e) => {
     tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
   else tipificarInCall(conversationId, participantId, globalCommunicationId, wrapupCode, wrapupName, note.value);
 
+  console.log("GLOBAL COMMUNICATION ID: " + globalCommunicationId);
   // Si el wrapup requiere fecha y la fecha está seleccionada, llamar createCallbackGateway
   if (wrapupsQueRequierenFecha.includes(wrapupLabel) && callbackDatetime) {
     createCallbackGateway();
@@ -712,6 +713,7 @@ function tipificarInCall(conversationId, participantId, communicationId, wrapupC
   .then((data) => {
     console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
     globalCommunicationId = null;
+    console.log(globalCommunicationId);
   })
   .catch((err) => {
     console.log("There was a failure calling postIntegrationsActionExecute");
