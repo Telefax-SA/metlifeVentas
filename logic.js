@@ -56,7 +56,7 @@ async function getCallbacks(userId) {
     order: 'desc',
     orderBy: 'conversationStart',
     paging: { pageNumber: 1, pageSize: 10 },
-    interval: '2025-08-01T03:00:00.000Z/2025-08-31T03:00:00.000Z',
+    interval: getIntervalLast30Days(),
     segmentFilters: [
       {
         type: 'and',
@@ -524,3 +524,13 @@ if (urlParams.has('code')) {
 
 
 
+function getIntervalLast30Days() {
+  const now = new Date();                 // fecha actual
+  const past = new Date();                 
+  past.setDate(now.getDate() - 30);        // 30 días atrás
+
+  const nowIso = now.toISOString();
+  const pastIso = past.toISOString();
+
+  return `${pastIso}/${nowIso}`;
+}
