@@ -713,7 +713,7 @@ function tipificarInCall(conversationId, participantId, communicationId, wrapupC
   .then((data) => {
     console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
     globalCommunicationId = null;
-    console.log(globalCommunicationId);
+
   })
   .catch((err) => {
     console.log("There was a failure calling postIntegrationsActionExecute");
@@ -886,7 +886,7 @@ function habilitarBoton(estado) {
 function procesarEvento(data) {
   if (!data.eventBody || !data.eventBody.participants) {
     console.warn("Mensaje sin eventBody o participants");
-    //habilitarBoton(false);
+    habilitarBoton(false);
     return;
   }
 
@@ -953,7 +953,8 @@ function suscribirseATopic(userId) {
       websocket.onmessage = function(event) {
         console.log("[WebSocket] Mensaje recibido:", event.data);
         const data = JSON.parse(event.data);
-        procesarEvento(data);
+        if(event.data.message !== "WebSocket Heartbeat" )
+          procesarEvento(data);
       };
 
       // Suscribirse al topic
