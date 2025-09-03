@@ -380,7 +380,7 @@ document.getElementById('Tipificar').onclick = (e) => {
     tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
   else tipificarInCall(conversationId, participantId, globalCommunicationId, wrapupCode, wrapupName, note.value);
 
-  console.log("GLOBAL COMMUNICATION ID: " + globalCommunicationId);
+  console.log("GLOBAL COMMUNICATION ID: " + globalCommunicationId + " CONVERSATIONID" + conversationId);
   // Si el wrapup requiere fecha y la fecha está seleccionada, llamar createCallbackGateway
   if (wrapupsQueRequierenFecha.includes(wrapupLabel) && callbackDatetime) {
     createCallbackGateway();
