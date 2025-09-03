@@ -652,7 +652,7 @@ function updateContact(contactListId, contactId, body, data){
   let actionId = "custom_-_d5ee5110-fcff-476e-a68a-00931642cd8b"; 
   let body2 = {"contactListId":contactListId,
               "contactId":contactId,
-              "data":data.stringify()
+              "data":data
             }; 
 
   let opts = { 
