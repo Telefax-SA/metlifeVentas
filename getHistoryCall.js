@@ -678,7 +678,7 @@ function updateContactMessage(success, msgTXT){
   const msg = document.createElement("div");
   msg.textContent = msgTXT
   msg.style.color = success ? "green" : "red";
-
+  messageDiv.innerHTML = "";
   messageDiv.appendChild(msg);
 }
 
@@ -830,7 +830,10 @@ function createCallback(userId, userName, queueId, scheduleTime, scriptId, callb
   apiIntegration.postIntegrationsActionExecute(actionId, body, opts)
     .then((data) => {
       console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
-      updateCallbackMessage(true, "Callback creado correctamente")
+      if(data.statusCode == "200")
+        updateCallbackMessage(true, "Callback creado correctamente")
+      else
+        updateCallbackMessage(true, data.body.message)
     })
     .catch((err) => {
       console.log("There was a failure calling postIntegrationsActionExecute");
@@ -844,7 +847,7 @@ function updateCallbackMessage(success, msgTXT){
   const msg = document.createElement("div");
   msg.textContent = msgTXT
   msg.style.color = success ? "green" : "red";
-
+  messageDiv.innerHTML = "";
   messageDiv.appendChild(msg);
 }
 
