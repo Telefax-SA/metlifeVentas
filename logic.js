@@ -661,7 +661,7 @@ function abrirModalEdit(conversationId) {
 
 function getAgentParticipantId(conv) {
   //if (!data || !data.conversations) return null;
-
+  console.log(conv);
   //for (const conv of data.conversations) {
     const participant = conv.participants.find(p => p.purpose === "agent");
     if (participant) {
