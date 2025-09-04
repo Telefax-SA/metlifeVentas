@@ -396,8 +396,7 @@ function abrirPopup(conversationId, event) {
   popup.innerHTML = `
     <button onclick="reprogramar('${conversationId}')">Reprogramar</button>
     <div style="padding: 5px;">
-      <input type="text" id="calendar-${conversationId}" class="calendar-picker" placeholder="Elegir fecha">
-      <button style="margin-top: 5px;" onclick="reprogramarConFlatpickr('${conversationId}')">Done ✅</button>
+      <button style="margin-top: 5px;" onclick="abrirModalEdit('${conversationId}')">Editar</button>
     </div>
     <button onclick="abrirModalCancelar('${conversationId}')">Cancelar ❌</button>
 
@@ -545,12 +544,80 @@ function abrirModalCancelar(conversationId) {
     <div class="modal-content">
       <h3>Cancelar Callback</h3>
       <p>¿Estás seguro de que querés cancelar este callback?</p>
+      <button style="background:red; color:white; margin-right:10px;"
+              onclick="confirmarCancelacion('${conversationId}')">
+        Cancelar Callback
+      </button>
+      <button onclick="cerrarModal()">Cerrar</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function confirmarCancelacion(conversationId) {
+  if (confirm("⚠️ ¿Seguro que querés cancelar este callback?")) {
+    cancelarCallback(conversationId);
+    cerrarModal();
+  }
+}
+
+function cerrarModal() {
+  document.querySelectorAll('.modal-cancelar').forEach(m => m.remove());
+}
+
+
+async function reprogramarDatePicker(conversationId) {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    alert('Debes iniciar sesión.');
+    return;
+  }
+
+  const nuevaFecha = document.getElementById("modal-calendar-"+conversationId);
+	const popup = document.querySelector('.popup-menu');
+ 
+
+
+  const res = await fetch(`https://api.${REGION}/api/v2/conversations/callbacks/`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+			conversationId:conversationId,
+			callbackScheduledTime: nuevaFecha.value
+		})
+  });
+
+  if (res.ok) {
+    alert(`Callback reprogramado para ${nuevaFecha}`);
+  } else {
+    const error = await res.json();
+    console.error('Error reprogramando:', error);
+    alert('Error reprogramando el callback.');
+  }
+}
+
+
+
+function abrirModalEdit(conversationId) {
+  // Eliminar modales previos
+  document.querySelectorAll('.modal-cancelar').forEach(m => m.remove());
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-cancelar';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3>Editar Callback</h3>
+      <p>¿Estás seguro de que querés cancelar este callback?</p>
       <div style="margin:10px 0;">
         <input type="text" id="modal-calendar-${conversationId}" placeholder="Elegir nueva fecha">
       </div>
       <button style="background:red; color:white; margin-right:10px;"
-              onclick="confirmarCancelacion('${conversationId}')">
-        Cancelar Callback
+              onclick="reprogramarDatePicker('${conversationId}')">
+        EditarCallback
       </button>
       <button onclick="cerrarModal()">Cerrar</button>
     </div>
@@ -565,15 +632,4 @@ function abrirModalCancelar(conversationId) {
     defaultDate: new Date(),
     time_24hr: true
   });
-}
-
-function confirmarCancelacion(conversationId) {
-  if (confirm("⚠️ ¿Seguro que querés cancelar este callback?")) {
-    cancelarCallback(conversationId);
-    cerrarModal();
-  }
-}
-
-function cerrarModal() {
-  document.querySelectorAll('.modal-cancelar').forEach(m => m.remove());
 }
