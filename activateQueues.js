@@ -81,9 +81,10 @@ async function startApp() {
   const inactiveQueues = queues.entities.filter(q => !q.joined);
 
 	renderQueueList('active-queues', activeQueue ? [activeQueue] : [], 'Desactivar', async (queue) => {
-		await routingApi.patchUserQueues(userId, [
-			{ id: queue.id, joined: false }
-		], {});
+		// await routingApi.patchUserQueues(userId, [
+		// 	{ id: queue.id, joined: false }
+		// ], {});
+    await activateQueues(userId, queue.id, false);
 		startApp();
 	});
 
@@ -94,7 +95,8 @@ async function startApp() {
 		}
 		patchBody.push({ id: queue.id, joined: true });
 
-		await routingApi.patchUserQueues(userId, patchBody, {});
+		//await routingApi.patchUserQueues(userId, patchBody, {});
+    await activateQueues(userId, queue.id, true);
 		startApp();
 	});
 }
@@ -124,5 +126,27 @@ function disableAllButtonsTemporarily(ms) {
   }, ms);
 }
 
+//custom_-_d2b5c2bb-6a23-4531-88dc-f49eb3b1b9e1
+async function activateQueues(userId, queueId, active){
+  let apiIntegration = new platformClient.IntegrationsApi();
+  let actionId = "custom_-_d2b5c2bb-6a23-4531-88dc-f49eb3b1b9e1"; 
+  let opts = { 
+    "flatten": false 
+  };
+  let body = { 
+    "queuesIds": queueId,
+    "userId": userId,
+    "active":active
+  };
+
+  apiIntegration.postIntegrationsActionExecute(actionId, body, opts)
+    .then((data) => {
+      console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
+    })
+    .catch((err) => {
+      console.log("There was a failure calling postIntegrationsActionExecute");
+      console.error(err);
+  });
+}
 
 init();
