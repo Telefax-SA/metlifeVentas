@@ -122,8 +122,8 @@ async function buildTable(callbacks) {
     ?  validSessions[0].callbackUserName 
     : "Sin nombre";
 
-    const participantId = getAgentParticipantId();
-    const communicationId = getLastAgentSessionId();
+    const participantId = getAgentParticipantId(callbacks);
+    const communicationId = getLastAgentSessionId(callbacks);
 
     const campaing = await getCampaignName(contact.sessions[0].outboundCampaignId, token) || "Sin nombre";
     let wrapups = obtenerWrapupsDeAgentes(cb.participants)
