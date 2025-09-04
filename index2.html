@@ -183,6 +183,19 @@ const platformClient = require('platformClient');
     gap: 5px; /* Espacio entre el checkbox y la palabra */
   }
 
+  .div3 {
+    max-height: 300px;   /* límite de altura del contenedor */
+    overflow-y: auto;    /* activa scroll vertical */
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+
+  .update-message {
+    margin-top: 10px;
+    font-size: 14px;
+  }
 </style>
 </head>
 <body>
@@ -299,6 +312,8 @@ const platformClient = require('platformClient');
   <div class="div3">
     <div id="gridjs-table" class="grid-table"></div>
     <button class="btn-update" id="update-table">Actualizar Base</button>
+    <!-- Contenedor para mensajes -->
+    <div id="update-message" class="update-message"></div>
   </div>
 
   <div class="div4">
@@ -321,6 +336,8 @@ const platformClient = require('platformClient');
       <label><input type="checkbox" id="checkboxOwner" name="checkboxOwner" /> Dueño</label>
       <select id="AgenteCall" name="AgenteCallback"></select>
       <button id ="Callback" type="submit">Agendar Callback</button>
+      <!-- Contenedor para mensajes -->
+      <div id="callback-message" class="callback-message"></div>
     </form>
   </div>
 </div>

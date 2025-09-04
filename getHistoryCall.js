@@ -664,11 +664,22 @@ function updateContact(contactListId, contactId, body, data){
   apiIntegration.postIntegrationsActionExecute(actionId, JSON.parse(JSON.stringify(body2)), opts)
   .then((data) => {
     console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
+    updateContactMessage(true, "✅ La base se actualizó correctamente.")
   })
   .catch((err) => {
     console.log("There was a failure calling postIntegrationsActionExecute");
     console.error(err);
+    updateContactMessage(false, "❌ Ocurrió un error al actualizar la base." + err)
   });
+}
+
+function updateContactMessage(success, msgTXT){
+  const messageDiv = document.getElementById('update-message');
+  const msg = document.createElement("div");
+  msg.textContent = msgTXT
+  msg.style.color = success ? "green" : "red";
+
+  messageDiv.appendChild(msg);
 }
 
 //custom_-_773503e5-ab4f-4859-9b5e-46a252aea088
@@ -819,11 +830,22 @@ function createCallback(userId, userName, queueId, scheduleTime, scriptId, callb
   apiIntegration.postIntegrationsActionExecute(actionId, body, opts)
     .then((data) => {
       console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
+      updateCallbackMessage(true, "Callback creado correctamente")
     })
     .catch((err) => {
       console.log("There was a failure calling postIntegrationsActionExecute");
       console.error(err);
+      updateCallbackMessage(false, "Ocuarrio un error al crear el callback " + err)
   });
+}
+
+function updateCallbackMessage(success, msgTXT){
+  const messageDiv = document.getElementById('callback-message');
+  const msg = document.createElement("div");
+  msg.textContent = msgTXT
+  msg.style.color = success ? "green" : "red";
+
+  messageDiv.appendChild(msg);
 }
 
 //custom_-_0cf03a38-50e4-41d8-be9d-29dbe0f47ecc
