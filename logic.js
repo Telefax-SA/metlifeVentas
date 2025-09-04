@@ -468,20 +468,41 @@ function reprogramarConFlatpickr(conversationId) {
 }
 
 
-function cancelarCallback(conversationId, participantId, communicationId) {
-  let body = {
-    "state": "disconnected"
+async function cancelarCallback(conversationId, participantId, communicationId) {
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    alert("Debes iniciar sesión.");
+    return;
   }
 
-  apiInstance.patchConversationsCallbackParticipantCommunication(conversationId, participantId, communicationId, body)
-  .then((data) => {
-    console.log(`patchConversationsCallbackParticipantCommunication success! data: ${JSON.stringify(data, null, 2)}`);
-  })
-  .catch((err) => {
-    console.log("There was a failure calling patchConversationsCallbackParticipantCommunication");
-    console.error(err);
-  });
+  const url = `https://api.sae1.pure.cloud/api/v2/conversations/callbacks/${conversationId}/participants/${participantId}/communications/${communicationId}`;
+  
+  const body = { state: "disconnected" };
+
+  try {
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errorText}`);
+    }
+
+    const data = await res.json();
+    console.log("✅ Callback cancelado:", data);
+    alert("Callback cancelado correctamente.");
+  } catch (err) {
+    console.error("❌ Error cancelando el callback:", err);
+    alert("Error cancelando el callback.");
+  }
 }
+
 
 
 (async () => {
