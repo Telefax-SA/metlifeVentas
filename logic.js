@@ -289,7 +289,6 @@ function iniciarTemporizador(timerElement, button) {
 }
 
 async function resolveWrapupObjects(wrapupObjects, accessToken) {
-  console.warn("ENTRA A FUNC BUSCADA:::  ")
   const cache = new Map();
   const isId = (code) => /^[a-zA-Z0-9\-]{8,}$/.test(code);
 
@@ -326,7 +325,7 @@ async function resolveWrapupObjects(wrapupObjects, accessToken) {
         return { wrapUpCode: name, wrapUpNote };
       } catch (error) {
         console.error(`Error fetching wrapUpCode "${wrapUpCode}":`, error.message);
-        cache.set(wrapUpCode, wrapUpCode); // fallback
+        cache.set(wrapUpCode, wrapUpCode); 
         return { wrapUpCode, wrapUpNote };
       }
     })
@@ -400,7 +399,8 @@ function abrirPopup(conversationId, event) {
       <input type="text" id="calendar-${conversationId}" class="calendar-picker" placeholder="Elegir fecha">
       <button style="margin-top: 5px;" onclick="reprogramarConFlatpickr('${conversationId}')">Done ✅</button>
     </div>
-    <button onclick="cancelarCallback('${conversationId}')">Cancelar</button>
+    <button onclick="abrirModalCancelar('${conversationId}')">Cancelar ❌</button>
+
   `;
 
   document.body.appendChild(popup);
@@ -533,4 +533,47 @@ function getIntervalLast30Days() {
   const pastIso = past.toISOString();
 
   return `${pastIso}/${nowIso}`;
+}
+
+function abrirModalCancelar(conversationId) {
+  // Eliminar modales previos
+  document.querySelectorAll('.modal-cancelar').forEach(m => m.remove());
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-cancelar';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3>Cancelar Callback</h3>
+      <p>¿Estás seguro de que querés cancelar este callback?</p>
+      <div style="margin:10px 0;">
+        <input type="text" id="modal-calendar-${conversationId}" placeholder="Elegir nueva fecha">
+      </div>
+      <button style="background:red; color:white; margin-right:10px;"
+              onclick="confirmarCancelacion('${conversationId}')">
+        Cancelar Callback
+      </button>
+      <button onclick="cerrarModal()">Cerrar</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Flatpickr para calendario
+  flatpickr(`#modal-calendar-${conversationId}`, {
+    enableTime: true,
+    dateFormat: "Y-m-d\\TH:i:S\\Z",
+    defaultDate: new Date(),
+    time_24hr: true
+  });
+}
+
+function confirmarCancelacion(conversationId) {
+  if (confirm("⚠️ ¿Seguro que querés cancelar este callback?")) {
+    cancelarCallback(conversationId);
+    cerrarModal();
+  }
+}
+
+function cerrarModal() {
+  document.querySelectorAll('.modal-cancelar').forEach(m => m.remove());
 }
