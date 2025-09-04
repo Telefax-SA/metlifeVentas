@@ -122,6 +122,9 @@ async function buildTable(callbacks) {
     ?  validSessions[0].callbackUserName 
     : "Sin nombre";
 
+    const participantId = getAgentParticipantId();
+    const communicationId = getLastAgentSessionId();
+
     const campaing = await getCampaignName(contact.sessions[0].outboundCampaignId, token) || "Sin nombre";
     let wrapups = obtenerWrapupsDeAgentes(cb.participants)
     console.log(wrapups);
@@ -141,7 +144,12 @@ async function buildTable(callbacks) {
       notes,
       gridjs.html(`
       <div style="position: relative;">
-        <button onclick="abrirPopup('${cb.conversationId}', event)">⋮</button>
+        <button 
+          onclick="abrirPopup('${cb.conversationId}', event)" 
+          data-participant-id="${participantId}" 
+          data-communication-id="${communicationId}">
+          ⋮
+        </button>
         <span id="timer-${cb.conversationId}" style="margin-left: 10px; font-weight: bold;"></span>
       </div>
     `)
@@ -176,33 +184,20 @@ async function buildTable(callbacks) {
 
 function obtenerWrapupsDeAgentes(participants) {
   const wrapups = [];
-
-  console.log("➡️ Iniciando función obtenerWrapupsDeAgentes");
   if (!participants || !Array.isArray(participants)) {
-    console.log("❌ participants no es un array válido:", participants);
     return wrapups;
   }
 
   participants.forEach((participant, i) => {
 
     if (participant.purpose === "agent") {
-      console.log(`✅ Participant[${i}] es un agent`);
-
       const sessions = participant.sessions || [];
-      console.log(`➡️ Tiene ${sessions.length} sesión(es)`);
-
       sessions.forEach((session, j) => {
-        console.log(`  📞 Session[${j}]`);
-
         const segments = session.segments || [];
-        console.log(`    🔄 Tiene ${segments.length} segmento(s)`);
-
         segments.forEach((segment, k) => {
         if (segment.segmentType === "wrapup"){
           const code = segment.wrapUpCode || null;
           const note = segment.wrapUpNote || null;
-
-          console.log(`      📍 Segment[${k}]: wrapupCode=${code}, wrapupNotes=${note}`);
 
           if (code || note) {
             wrapups.push({
@@ -215,7 +210,7 @@ function obtenerWrapupsDeAgentes(participants) {
     }
   });
 
-  console.log("✅ Finalizado. Wrapups encontrados:", wrapups.length);
+
   return wrapups;
 }
 
@@ -390,6 +385,9 @@ async function obtenerMiPerfil() {
 function abrirPopup(conversationId, event) {
   // Eliminar otros popups
   document.querySelectorAll('.popup-menu').forEach(p => p.remove());
+  const button = event.currentTarget;
+  const participantId = button.getAttribute("data-participant-id");
+  const communicationId = button.getAttribute("data-communication-id");
 
   const popup = document.createElement('div');
   popup.className = 'popup-menu';
@@ -398,7 +396,7 @@ function abrirPopup(conversationId, event) {
     <div style="padding: 5px;">
       <button style="margin-top: 5px;" onclick="abrirModalEdit('${conversationId}')">Editar</button>
     </div>
-    <button onclick="abrirModalCancelar('${conversationId}')">Cancelar ❌</button>
+    <button onclick="abrirModalCancelar('${conversationId}', '${participantId}', '${communicationId}')">Cancelar ❌</button>
 
   `;
 
@@ -470,14 +468,19 @@ function reprogramarConFlatpickr(conversationId) {
 }
 
 
-function abrirCalendario(conversationId) {
-  // Esta función luego abrirá un calendar date picker
-  console.log(`🗓 Abrir calendario para: ${conversationId}`);
-}
+function cancelarCallback(conversationId, participantId, communicationId) {
+  let body = {
+    "state": "disconnected"
+  }
 
-function cancelarCallback(conversationId) {
-  // Esta función luego cancelará el callback
-  console.log(`❌ Cancelar callback: ${conversationId}`);
+  apiInstance.patchConversationsCallbackParticipantCommunication(conversationId, participantId, communicationId, body)
+  .then((data) => {
+    console.log(`patchConversationsCallbackParticipantCommunication success! data: ${JSON.stringify(data, null, 2)}`);
+  })
+  .catch((err) => {
+    console.log("There was a failure calling patchConversationsCallbackParticipantCommunication");
+    console.error(err);
+  });
 }
 
 
@@ -534,7 +537,7 @@ function getIntervalLast30Days() {
   return `${pastIso}/${nowIso}`;
 }
 
-function abrirModalCancelar(conversationId) {
+function abrirModalCancelar(conversationId, participantId, communicationId) {
   // Eliminar modales previos
   document.querySelectorAll('.modal-cancelar').forEach(m => m.remove());
 
@@ -545,7 +548,7 @@ function abrirModalCancelar(conversationId) {
       <h3>Cancelar Callback</h3>
       <p>¿Estás seguro de que querés cancelar este callback?</p>
       <button style="background:red; color:white; margin-right:10px;"
-              onclick="confirmarCancelacion('${conversationId}')">
+              onclick="confirmarCancelacion('${conversationId}', '${participantId}', '${communicationId}')">
         Cancelar Callback
       </button>
       <button onclick="cerrarModal()">Cerrar</button>
@@ -555,9 +558,9 @@ function abrirModalCancelar(conversationId) {
   document.body.appendChild(modal);
 }
 
-function confirmarCancelacion(conversationId) {
+function confirmarCancelacion(conversationId, participantId, communicationId) {
   if (confirm("⚠️ ¿Seguro que querés cancelar este callback?")) {
-    cancelarCallback(conversationId);
+    cancelarCallback(conversationId, participantId, communicationId);
     cerrarModal();
   }
 }
@@ -633,3 +636,31 @@ function abrirModalEdit(conversationId) {
     time_24hr: true
   });
 }
+
+
+function getAgentParticipantId(data) {
+  if (!data || !data.conversations) return null;
+
+  for (const conv of data.conversations) {
+    const participant = conv.participants.find(p => p.purpose === "agent");
+    if (participant) {
+      return participant.participantId;
+    }
+  }
+  return null; 
+}
+
+
+function getLastAgentSessionId(data) {
+  if (!data || !data.conversations) return null;
+
+  for (const conv of data.conversations) {
+    const participant = conv.participants.find(p => p.purpose === "agent");
+    if (participant && Array.isArray(participant.sessions) && participant.sessions.length > 0) {
+      const lastSession = participant.sessions[participant.sessions.length - 1];
+      return lastSession.sessionId;
+    }
+  }
+  return null; // si no encuentra nada
+}
+
