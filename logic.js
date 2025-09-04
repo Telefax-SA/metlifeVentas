@@ -659,29 +659,29 @@ function abrirModalEdit(conversationId) {
 }
 
 
-function getAgentParticipantId(data) {
-  if (!data || !data.conversations) return null;
+function getAgentParticipantId(conv) {
+  //if (!data || !data.conversations) return null;
 
-  for (const conv of data.conversations) {
+  //for (const conv of data.conversations) {
     const participant = conv.participants.find(p => p.purpose === "agent");
     if (participant) {
       return participant.participantId;
     }
-  }
+  //}
   return null; 
 }
 
 
-function getLastAgentSessionId(data) {
-  if (!data || !data.conversations) return null;
+function getLastAgentSessionId(conv) {
+  //if (!data || !data.conversations) return null;
 
-  for (const conv of data.conversations) {
+  //for (const conv of data.conversations) {
     const participant = conv.participants.find(p => p.purpose === "agent");
     if (participant && Array.isArray(participant.sessions) && participant.sessions.length > 0) {
       const lastSession = participant.sessions[participant.sessions.length - 1];
       return lastSession.sessionId;
     }
-  }
+  //}
   return null; // si no encuentra nada
 }
 
