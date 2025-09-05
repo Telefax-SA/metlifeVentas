@@ -122,8 +122,8 @@ async function buildTable(callbacks) {
     ?  validSessions[0].callbackUserName 
     : "Sin nombre";
 
-    const participantId = getAgentParticipantId(callbacks);
-    const communicationId = getLastAgentSessionId(callbacks);
+    const participantId = getAgentParticipantId(cb);
+    const communicationId = getLastAgentSessionId(cb);
 
     const campaing = await getCampaignName(contact.sessions[0].outboundCampaignId, token) || "Sin nombre";
     let wrapups = obtenerWrapupsDeAgentes(cb.participants)
@@ -450,22 +450,22 @@ function abrirPopup(conversationId, event) {
 }
 
 
-function reprogramarConFlatpickr(conversationId) {
-  const input = document.getElementById(`calendar-${conversationId}`);
-  const fechaSeleccionada = input?.value;
+// function reprogramarConFlatpickr(conversationId) {
+//   const input = document.getElementById(`calendar-${conversationId}`);
+//   const fechaSeleccionada = input?.value;
 
-  if (!fechaSeleccionada) {
-    alert("Selecciona una fecha primero.");
-    return;
-  }
+//   if (!fechaSeleccionada) {
+//     alert("Selecciona una fecha primero.");
+//     return;
+//   }
 
-  console.log(`Reprogramar ${conversationId} para ${fechaSeleccionada}`);
+//   console.log(`Reprogramar ${conversationId} para ${fechaSeleccionada}`);
 
-  // Lógica futura: enviar PATCH
-  document.querySelectorAll('.popup-menu').forEach(p => p.remove());
+//   // Lógica futura: enviar PATCH
+//   document.querySelectorAll('.popup-menu').forEach(p => p.remove());
 
-  // Podés llamar a reprogramarCallbackReal(conversationId, fechaSeleccionada);
-}
+
+// }
 
 
 async function cancelarCallback(conversationId, participantId, communicationId) {
@@ -497,6 +497,13 @@ async function cancelarCallback(conversationId, participantId, communicationId) 
     const data = await res.json();
     console.log("✅ Callback cancelado:", data);
     alert("Callback cancelado correctamente.");
+    
+    let userId = urlParams.get('userId');
+    if (!userId) {
+      userId = await obtenerMiPerfil();
+    }
+    getCallbacks(userId);
+
   } catch (err) {
     console.error("❌ Error cancelando el callback:", err);
     alert("Error cancelando el callback.");
@@ -617,6 +624,12 @@ async function reprogramarDatePicker(conversationId) {
 
   if (res.ok) {
     alert(`Callback reprogramado para ${nuevaFecha}`);
+
+    let userId = urlParams.get('userId');
+    if (!userId) {
+      userId = await obtenerMiPerfil();
+    }
+    getCallbacks(userId);
   } else {
     const error = await res.json();
     console.error('Error reprogramando:', error);
