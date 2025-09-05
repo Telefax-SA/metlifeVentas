@@ -928,6 +928,7 @@ function procesarEvento(data) {
             llamadaTerminada = true;
             communicationId = call.id || null;
             console.warn("COMUNICATION ID:  " + communicationId);
+            console.error ("SUPUESTAMENTE LLAMDA TERMINATED: " + JSON.stringify( data))
             break; // ya encontré un callback desconectado para este participante
           }
         }
@@ -978,8 +979,8 @@ function suscribirseATopic(userId) {
       websocket.onmessage = function(event) {
         console.log("[WebSocket] Mensaje recibido:", event.data);
         const data = JSON.parse(event.data);
-        if(event.data.message !== "WebSocket Heartbeat" )
-          procesarEvento(data);
+        
+        procesarEvento(data);
       };
 
       // Suscribirse al topic
@@ -990,7 +991,6 @@ function suscribirseATopic(userId) {
         .catch(err => {
           console.error("[suscribirseATopic] Error al suscribirse al topic ❌", err);
         });
-
     })
     .catch(err => {
       console.error("[suscribirseATopic] Error al crear canal ❌", err);

@@ -608,8 +608,6 @@ async function reprogramarDatePicker(conversationId) {
   const nuevaFecha = document.getElementById("modal-calendar-"+conversationId);
 	const popup = document.querySelector('.popup-menu');
  
-
-
   const res = await fetch(`https://api.${REGION}/api/v2/conversations/callbacks/`, {
     method: 'PATCH',
     headers: {
