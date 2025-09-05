@@ -676,7 +676,7 @@ function getAgentParticipantId(conv) {
   //if (!data || !data.conversations) return null;
   console.log(conv);
   //for (const conv of data.conversations) {
-    const participant = conv[0].participants.find(p => p.purpose === "agent");
+    const participant = conv.participants.find(p => p.purpose === "agent");
     if (participant) {
       return participant.participantId;
     }
@@ -689,7 +689,7 @@ function getLastAgentSessionId(conv) {
   //if (!data || !data.conversations) return null;
 
   //for (const conv of data.conversations) {
-    const participant = conv[0].participants.find(p => p.purpose === "agent");
+    const participant = conv.participants.find(p => p.purpose === "agent");
     if (participant && Array.isArray(participant.sessions) && participant.sessions.length > 0) {
       const lastSession = participant.sessions[participant.sessions.length - 1];
       return lastSession.sessionId;
