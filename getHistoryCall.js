@@ -724,7 +724,7 @@ function tipificarInCall(conversationId, participantId, communicationId, wrapupC
   .then((data) => {
     console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
     globalCommunicationId = null;
-
+    habilitarBoton(true);
   })
   .catch((err) => {
     console.log("There was a failure calling postIntegrationsActionExecute");
@@ -918,6 +918,7 @@ function procesarEvento(data) {
   const participantes = data.eventBody.participants;
 
   let llamadaTerminada = false;
+  let llamadaTipificada = false;
   let communicationId = null;
 
   for (const participante of participantes) {
@@ -929,6 +930,8 @@ function procesarEvento(data) {
             communicationId = call.id || null;
             console.warn("COMUNICATION ID:  " + communicationId);
             console.error ("SUPUESTAMENTE LLAMDA TERMINATED: " + JSON.stringify( data))
+            llamadaTipificada = call.afterCallWark.state && call.afterCallWark.state === "pending" ? false:true;
+            console.log("Llamada Tipificada ? : " + llamadaTipificada )
             break; // ya encontré un callback desconectado para este participante
           }
         }
@@ -937,7 +940,7 @@ function procesarEvento(data) {
     if (llamadaTerminada) break; // no necesito seguir buscando si ya la encontré
   }
 
-  if (llamadaTerminada) {
+  if (llamadaTerminada && !llamadaTipificada) {
     globalCommunicationId = communicationId;
     console.log("Llamada terminada, communicationId:", globalCommunicationId);
     habilitarBoton(true);
