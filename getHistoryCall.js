@@ -930,7 +930,7 @@ function procesarEvento(data) {
             communicationId = call.id || null;
             console.warn("COMUNICATION ID:  " + communicationId);
             console.error ("SUPUESTAMENTE LLAMDA TERMINATED: " + JSON.stringify( data))
-            llamadaTipificada = call.afterCallWark?.state === "pending" ? false : true;
+            llamadaTipificada = call.afterCallWork?.state === "pending" ? false : true;
             console.log("Llamada Tipificada ? : " + llamadaTipificada )
             break; // ya encontré un callback desconectado para este participante
           }
