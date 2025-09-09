@@ -380,11 +380,18 @@ document.getElementById('Tipificar').onclick = (e) => {
 
   // Si pasa la validación, limpiar el mensaje
   messageDiv.textContent = "";
-  const auxCommunicationId = localStorage.getItem("customerCommunicationId");
-  if(globalCommunicationId === null)
+  const auxCommunicationId = localStorage.getItem("agentCommunicationId");
+  if(globalCommunicationId === null){
     //tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
     tipificarInCall(conversationId, participantId, auxCommunicationId, wrapupCode, wrapupName, note.value);
-  else tipificarInCall(conversationId, participantId, globalCommunicationId, wrapupCode, wrapupName, note.value);
+    //desconectar la interaccion
+    disconnectInteraction(conversationId, participantId);
+    //agregar a participant Data (respaldo por si nos piden esa info)
+  }
+  else {
+    tipificarInCall(conversationId, participantId, globalCommunicationId, wrapupCode, wrapupName, note.value);
+    //agregar a participant Data (respaldo por si nos piden esa info)
+  }
 
   console.log("GLOBAL COMMUNICATION ID: " + globalCommunicationId + " CONVERSATIONID" + conversationId);
   // Si el wrapup requiere fecha y la fecha está seleccionada, llamar createCallbackGateway
@@ -1015,4 +1022,23 @@ function suscribirseATopic(userId) {
     .catch(err => {
       console.error("[suscribirseATopic] Error al crear canal ❌", err);
     });
+}
+
+
+
+function disconnectInteraction(conversationId, participantId){
+  let access_token = localStorage.getItem('access_token');
+	client.setAccessToken(access_token)
+  let apiInstance = new platformClient.ConversationsApi();
+
+  let body = {"state": "DISCONNECTED"};
+
+  apiInstance.patchConversationsCallParticipant(conversationId, participantId, body)
+  .then(() => {
+    console.log("patchConversationsCallParticipant returned successfully.");
+  })
+  .catch((err) => {
+    console.log("There was a failure calling patchConversationsCallParticipant");
+    console.error(err);
+  });
 }
