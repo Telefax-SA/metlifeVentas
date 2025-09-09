@@ -23,7 +23,7 @@ async function login() {
   const queueId =  urlParams.get('queueId') || '';
   const campaingName =  urlParams.get('campaingName') || '';
   const pending =  urlParams.get('pending') || '';
-  const agentCommunicationId =  urlParams.get('agentCommunicationId') || '';
+  //const agentCommunicationId =  urlParams.get('agentCommunicationId') || '';
   // const customerCommunicationId =  urlParams.get('customerCommunicationId') || '';
 
 
@@ -38,7 +38,7 @@ async function login() {
   if (queueId) stateObj.append('queueId', queueId);
   if (campaingName) stateObj.append('campaingName', campaingName);
   if (pending) stateObj.append('pending', pending);
-  if (agentCommunicationId) stateObj.append('agentCommunicationId', agentCommunicationId);
+  //if (agentCommunicationId) stateObj.append('agentCommunicationId', agentCommunicationId);
   // if (customerCommunicationId) stateObj.append('customerCommunicationId', customerCommunicationId);
   
   
@@ -378,11 +378,11 @@ document.getElementById('Tipificar').onclick = (e) => {
 
   // Si pasa la validación, limpiar el mensaje
   messageDiv.textContent = "";
-  const auxCommunicationId = localStorage.getItem("agentCommunicationId");
+  //const auxCommunicationId = localStorage.getItem("agentCommunicationId");
   if(globalCommunicationId === null){
     console.warn("TIPIFICACION GLOBAL ");
-    //tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
-    tipificarInCall(conversationId, participantId, auxCommunicationId, wrapupCode, wrapupName, note.value);
+    tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
+    //tipificarInCall(conversationId, participantId, auxCommunicationId, wrapupCode, wrapupName, note.value);
     //desconectar la interaccion
     disconnectInteraction(conversationId, participantId);
     //agregar a participant Data (respaldo por si nos piden esa info)
