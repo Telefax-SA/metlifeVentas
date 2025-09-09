@@ -932,6 +932,11 @@ function procesarEvento(data) {
             console.error ("SUPUESTAMENTE LLAMDA TERMINATED: " + JSON.stringify( data))
             llamadaTipificada = call.afterCallWork?.state === "pending" || call.afterCallWork?.state === "complete" || call.afterCallWork?.state === "notApplicable"? false : true;
             console.log("Llamada Tipificada ? : " + llamadaTipificada )
+            if (call.afterCallWork?.state === "complete"){
+              habilitarBoton(true);
+              globalCommunicationId = null;
+              return;
+            }
             break; // ya encontré un callback desconectado para este participante
           }
         }
