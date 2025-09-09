@@ -380,7 +380,7 @@ document.getElementById('Tipificar').onclick = (e) => {
 
   // Si pasa la validación, limpiar el mensaje
   messageDiv.textContent = "";
-  const auxCommunicationId = localStorage.getItem("agentCommunicationId");
+  const auxCommunicationId = localStorage.getItem("customerCommunicationId");
   if(globalCommunicationId === null)
     //tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
     tipificarInCall(conversationId, participantId, auxCommunicationId, wrapupCode, wrapupName, note.value);
@@ -930,7 +930,7 @@ function procesarEvento(data) {
 
   for (const participante of participantes) {
     if (participante.purpose === "agent" || participante.purpose === "customer") {
-      if(!call){  //no se han realizado llamadas (es cuando apenas cae la interaccion y aún no se han realizado llamdas)
+      if(!participante.call){  //no se han realizado llamadas (es cuando apenas cae la interaccion y aún no se han realizado llamdas)
         habilitarBoton(true);
         globalCommunicationId = null;
         return;
