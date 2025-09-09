@@ -23,8 +23,8 @@ async function login() {
   const queueId =  urlParams.get('queueId') || '';
   const campaingName =  urlParams.get('campaingName') || '';
   const pending =  urlParams.get('pending') || '';
-  const agentCommunicationId =  urlParams.get('agentCommunicationId') || '';
-  const customerCommunicationId =  urlParams.get('customerCommunicationId') || '';
+  // const agentCommunicationId =  urlParams.get('agentCommunicationId') || '';
+  // const customerCommunicationId =  urlParams.get('customerCommunicationId') || '';
 
 
   const stateObj = new URLSearchParams();
@@ -38,8 +38,8 @@ async function login() {
   if (queueId) stateObj.append('queueId', queueId);
   if (campaingName) stateObj.append('campaingName', campaingName);
   if (pending) stateObj.append('pending', pending);
-  if (agentCommunicationId) stateObj.append('agentCommunicationId', agentCommunicationId);
-  if (customerCommunicationId) stateObj.append('customerCommunicationId', customerCommunicationId);
+  // if (agentCommunicationId) stateObj.append('agentCommunicationId', agentCommunicationId);
+  // if (customerCommunicationId) stateObj.append('customerCommunicationId', customerCommunicationId);
   
   
   // Podés agregar más parámetros al state así:
@@ -114,7 +114,7 @@ async function getHistoryCalls(contactId) {
 
   try {
     const response = await api.postAnalyticsConversationsDetailsQuery(query);
-		console.log(response);
+		//console.log(response);
     const data = await formatearDatos(response.conversations || []);
     renderTabla(data);
   } catch (err) {
@@ -135,10 +135,8 @@ async function formatearDatos(convs) {
     const agentes = await obtenerNombresAgentes(conv, usersApi);
     const wrapups = obtenerWrapups(conv);
     const accessToken = localStorage.getItem('access_token');
-    console.log("Antes: "+wrapups.notes);
     const resolvedCodes = await resolveWrapupCodesArray(wrapups.codes.split(", "), accessToken);
 
-    console.log("Despues: "+wrapups.notes);
     return [
       fecha,
       tTalk,
@@ -380,7 +378,7 @@ document.getElementById('Tipificar').onclick = (e) => {
 
   // Si pasa la validación, limpiar el mensaje
   messageDiv.textContent = "";
-  const auxCommunicationId = localStorage.getItem("agentCommunicationId");
+  //const auxCommunicationId = localStorage.getItem("agentCommunicationId");
   if(globalCommunicationId === null){
     tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
     console.warn("SE EJECUTA EN GLOBAL? POR QUE? No entiendo")
@@ -608,7 +606,7 @@ let ContactName = "customer";
 
 function autocompleteForm(body) {
   ContactName = (body.nombre || '') + " " + (body.apellido || '');
-  console.log("el body esta vacio?:: " + JSON.stringify(body));
+ 
   const formMap = {
     nombres: body.nombre,
     apellidos: body.apellido,
@@ -674,7 +672,7 @@ function updateContact(contactListId, contactId, body, data){
   let opts = { 
     "flatten": false 
   };
-  console.error("BODY 2: " + JSON.stringify(body2, null, 2))
+  
   apiIntegration.postIntegrationsActionExecute(actionId, JSON.parse(JSON.stringify(body2)), opts)
   .then((data) => {
     console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
@@ -739,7 +737,7 @@ function tipificarInCall(conversationId, participantId, communicationId, wrapupC
   .then((data) => {
     console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
     globalCommunicationId = null;
-    habilitarBoton(true);
+    habilitarBotonTipificar(true);
   })
   .catch((err) => {
     console.log("There was a failure calling postIntegrationsActionExecute");
@@ -914,7 +912,7 @@ function addTagVenta(conversationId, tagName){
 
 let globalCommunicationId = null;
 
-function habilitarBoton(estado) {
+function habilitarBotonTipificar(estado) {
   const button = document.getElementById("Tipificar");
   if (button) {
     button.disabled = !estado;
@@ -953,7 +951,7 @@ function procesarEvento(data) {
             llamadaTipificada = call.afterCallWork?.state === "pending" || call.afterCallWork?.state === "complete" || call.afterCallWork?.state === "notApplicable"? false : true;
             console.log("Llamada Tipificada ? : " + llamadaTipificada )
             if (call.afterCallWork?.state === "complete"){
-              habilitarBoton(true);
+              habilitarBotonTipificar(true);
               globalCommunicationId = null;
               return;
             }
@@ -968,10 +966,10 @@ function procesarEvento(data) {
   if (llamadaTerminada && !llamadaTipificada) {
     globalCommunicationId = communicationId;
     console.log("Llamada terminada, communicationId:", globalCommunicationId);
-    habilitarBoton(true);
+    habilitarBotonTipificar(true);
   } else {
     globalCommunicationId = null;
-    habilitarBoton(false);
+    habilitarBotonTipificar(false);
     console.log("Llamada no terminada o no encontrada");
   }
 }
