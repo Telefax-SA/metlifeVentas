@@ -380,9 +380,10 @@ document.getElementById('Tipificar').onclick = (e) => {
 
   // Si pasa la validación, limpiar el mensaje
   messageDiv.textContent = "";
+  const auxCommunicationId = localStorage.getItem("agentCommunicationId");
   if(globalCommunicationId === null)
     //tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
-    tipificarInCall(conversationId, participantId, localStorage.getItem("agentCommunicationId"), wrapupCode, wrapupName, note.value);
+    tipificarInCall(conversationId, participantId, auxCommunicationId, wrapupCode, wrapupName, note.value);
   else tipificarInCall(conversationId, participantId, globalCommunicationId, wrapupCode, wrapupName, note.value);
 
   console.log("GLOBAL COMMUNICATION ID: " + globalCommunicationId + " CONVERSATIONID" + conversationId);
