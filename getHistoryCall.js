@@ -938,9 +938,9 @@ function procesarEvento(data) {
   for (const participante of participantes) {
     if (participante.purpose === "agent" || participante.purpose === "customer") {
       if(!participante.call){  //no se han realizado llamadas (es cuando apenas cae la interaccion y aún no se han realizado llamdas)
-        habilitarBoton(true);
-        globalCommunicationId = null;
-        return;
+        // habilitarBoton(true);
+        // globalCommunicationId = null;
+        // return;
       }
       if (participante.calls && Array.isArray(participante.calls)) {
         for (const call of participante.calls) {
