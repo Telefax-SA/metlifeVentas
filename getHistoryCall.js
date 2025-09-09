@@ -383,6 +383,7 @@ document.getElementById('Tipificar').onclick = (e) => {
   const auxCommunicationId = localStorage.getItem("agentCommunicationId");
   if(globalCommunicationId === null){
     //tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
+    console.warn("SE EJECUTA EN GLOBAL? POR QUE? No entiendo")
     tipificarInCall(conversationId, participantId, auxCommunicationId, wrapupCode, wrapupName, note.value);
     //desconectar la interaccion
     disconnectInteraction(conversationId, participantId);
