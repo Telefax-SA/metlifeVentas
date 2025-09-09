@@ -23,6 +23,8 @@ async function login() {
   const queueId =  urlParams.get('queueId') || '';
   const campaingName =  urlParams.get('campaingName') || '';
   const pending =  urlParams.get('pending') || '';
+  const agentCommunicationId =  urlParams.get('agentCommunicationId') || '';
+  const customerCommunicationId =  urlParams.get('customerCommunicationId') || '';
 
 
   const stateObj = new URLSearchParams();
@@ -36,6 +38,8 @@ async function login() {
   if (queueId) stateObj.append('queueId', queueId);
   if (campaingName) stateObj.append('campaingName', campaingName);
   if (pending) stateObj.append('pending', pending);
+  if (agentCommunicationId) stateObj.append('agentCommunicationId', agentCommunicationId);
+  if (customerCommunicationId) stateObj.append('customerCommunicationId', customerCommunicationId);
   
   
   // Podés agregar más parámetros al state así:
@@ -377,7 +381,8 @@ document.getElementById('Tipificar').onclick = (e) => {
   // Si pasa la validación, limpiar el mensaje
   messageDiv.textContent = "";
   if(globalCommunicationId === null)
-    tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
+    //tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
+    tipificarInCall(conversationId, participantId, localStorage.getItem("agentCommunicationId"), wrapupCode, wrapupName, note.value);
   else tipificarInCall(conversationId, participantId, globalCommunicationId, wrapupCode, wrapupName, note.value);
 
   console.log("GLOBAL COMMUNICATION ID: " + globalCommunicationId + " CONVERSATIONID" + conversationId);
@@ -684,6 +689,7 @@ function updateContactMessage(success, msgTXT){
 
 //custom_-_773503e5-ab4f-4859-9b5e-46a252aea088
 function tipificar(conversationId, participantId, wrapupCode, wrapupName, note) {
+  console.warn("TIPIFICAR TODA LA INTERACCION!!");
   let apiIntegration = new platformClient.IntegrationsApi();
   let actionId = "custom_-_773503e5-ab4f-4859-9b5e-46a252aea088"; 
   let body = {"conversationId":conversationId,
@@ -923,7 +929,7 @@ function procesarEvento(data) {
 
   for (const participante of participantes) {
     if (participante.purpose === "agent" || participante.purpose === "customer") {
-      if(!call){  //no se han realizado llamdas (es cuando apenas cae la interaccion y aún no se han realizado llamdas)
+      if(!call){  //no se han realizado llamadas (es cuando apenas cae la interaccion y aún no se han realizado llamdas)
         habilitarBoton(true);
         globalCommunicationId = null;
         return;
