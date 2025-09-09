@@ -382,11 +382,11 @@ document.getElementById('Tipificar').onclick = (e) => {
   messageDiv.textContent = "";
   const auxCommunicationId = localStorage.getItem("agentCommunicationId");
   if(globalCommunicationId === null){
-    //tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
+    tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
     console.warn("SE EJECUTA EN GLOBAL? POR QUE? No entiendo")
-    tipificarInCall(conversationId, participantId, auxCommunicationId, wrapupCode, wrapupName, note.value);
+    //tipificarInCall(conversationId, participantId, auxCommunicationId, wrapupCode, wrapupName, note.value);
     //desconectar la interaccion
-    disconnectInteraction(conversationId, participantId);
+    //disconnectInteraction(conversationId, participantId);
     //agregar a participant Data (respaldo por si nos piden esa info)
   }
   else {
