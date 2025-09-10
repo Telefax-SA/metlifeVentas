@@ -81,6 +81,17 @@ async function exchangeCodeForToken(code) {
 	}
 }
 
+function getIntervalLast30Days() {
+  const now = new Date();                 // fecha actual
+  const past = new Date();                 
+  past.setDate(now.getDate() - 30);        // 30 días atrás
+
+  const nowIso = now.toISOString();
+  const pastIso = past.toISOString();
+
+  return `${pastIso}/${nowIso}`;
+}
+
 async function getHistoryCalls(contactId) {
 	let access_token = localStorage.getItem('access_token');
 	client.setAccessToken(access_token)
@@ -94,7 +105,7 @@ async function getHistoryCalls(contactId) {
     order: "desc",
     orderBy: "conversationStart",
     paging: { pageSize: 50, pageNumber: 1 },
-    interval: "2025-08-01T03:00:00.000Z/2025-08-31T03:00:00.000Z",
+    interval: getIntervalLast30Days(),
     segmentFilters: [
       {
         type: "or",
