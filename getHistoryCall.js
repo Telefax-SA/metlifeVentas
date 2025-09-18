@@ -338,7 +338,7 @@ if (!window.__alreadyRan) {
       suscribirseATopic(userId);
       await getHistoryCalls(contactId);
       await getContactData(contactId, campaignId);
-      await getWrapUpCodes("*");
+      //await getWrapUpCodes("*");
       await getUsersByDivision("Home");
 
       const title = document.getElementById("campanaTitle");
