@@ -204,7 +204,7 @@ function sumarTTalkComplete(conv) {
       }
     }
   }
-  const totalSeconds = Math.floor(total / 1000); // redondeamos hacia abajo
+  const totalSeconds = Math.floor(total / 1000); 
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
 
@@ -885,7 +885,32 @@ function addInfoVenta(conversationId, participantId, ventaData){
   let body = { 
     "conversationId": conversationId,
     "participantId": participantId,
-    "ventaData": ventaData
+    "ventaData": ventaData,
+    "labelName": "infoVenta"
+  };
+
+  apiIntegration.postIntegrationsActionExecute(actionId, body, opts)
+    .then((data) => {
+      console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
+    })
+    .catch((err) => {
+      console.log("There was a failure calling postIntegrationsActionExecute");
+      console.error(err);
+  });
+}
+
+//custom_-_0cf03a38-50e4-41d8-be9d-29dbe0f47ecc
+function addTipificacionInfo(conversationId, participantId, data){
+  let apiIntegration = new platformClient.IntegrationsApi();
+  let actionId = "custom_-_0cf03a38-50e4-41d8-be9d-29dbe0f47ecc"; 
+  let opts = { 
+    "flatten": false 
+  };
+  let body = { 
+    "conversationId": conversationId,
+    "participantId": participantId,
+    "ventaData": data,
+    "labelName": "tipificacion"
   };
 
   apiIntegration.postIntegrationsActionExecute(actionId, body, opts)
