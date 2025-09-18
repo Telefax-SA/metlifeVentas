@@ -355,62 +355,62 @@ if (!window.__alreadyRan) {
   })();
 }
 
-document.getElementById('Tipificar').onclick = (e) => {
-  e.preventDefault(); 
-  const conversationId = localStorage.getItem('conversationId');
-  const participantId = localStorage.getItem('participantId');
+// document.getElementById('Tipificar').onclick = (e) => {
+//   e.preventDefault(); 
+//   const conversationId = localStorage.getItem('conversationId');
+//   const participantId = localStorage.getItem('participantId');
 
-  const wrapupSelect = document.getElementById('wrapup');
-  const wrapupCode = wrapupSelect.value;
-  const wrapupName = wrapupSelect.options[wrapupSelect.selectedIndex].text;
+//   const wrapupSelect = document.getElementById('wrapup');
+//   const wrapupCode = wrapupSelect.value;
+//   const wrapupName = wrapupSelect.options[wrapupSelect.selectedIndex].text;
 
-  const note = document.getElementById("notes");
+//   const note = document.getElementById("notes");
   
-  const wrapupLabel = wrapupSelect.options[wrapupSelect.selectedIndex]?.text || '';
-  const callbackDatetime = document.getElementById('callback-datetime').value;
-  const messageDiv = document.getElementById('tipificarMessage');
-  // Lista de labels que requieren fecha de callback
+//   const wrapupLabel = wrapupSelect.options[wrapupSelect.selectedIndex]?.text || '';
+//   const callbackDatetime = document.getElementById('callback-datetime').value;
+//   const messageDiv = document.getElementById('tipificarMessage');
+//   // Lista de labels que requieren fecha de callback
 
-  if (!wrapupCode) {
-    messageDiv.textContent = "Debe seleccionar una tipificación.";
-    messageDiv.style.color = "red";
-    return; // detener la ejecución
-  }
-  const wrapupsQueRequierenFecha = [
-    "Apertura de deposito",
-    "Otro wrapup que requiere fecha"
-  ];
-  // Si el wrapup es de los que requieren fecha y no hay fecha seleccionada
-  if (wrapupsQueRequierenFecha.includes(wrapupLabel) && !callbackDatetime) {
-    messageDiv.textContent = "Debe seleccionar una fecha para el callback.";
-    messageDiv.style.color = "red";
-    return; // detener la ejecución
-  }
+//   if (!wrapupCode) {
+//     messageDiv.textContent = "Debe seleccionar una tipificación.";
+//     messageDiv.style.color = "red";
+//     return; // detener la ejecución
+//   }
+//   const wrapupsQueRequierenFecha = [
+//     "Apertura de deposito",
+//     "Otro wrapup que requiere fecha"
+//   ];
+//   // Si el wrapup es de los que requieren fecha y no hay fecha seleccionada
+//   if (wrapupsQueRequierenFecha.includes(wrapupLabel) && !callbackDatetime) {
+//     messageDiv.textContent = "Debe seleccionar una fecha para el callback.";
+//     messageDiv.style.color = "red";
+//     return; // detener la ejecución
+//   }
 
-  // Si pasa la validación, limpiar el mensaje
-  messageDiv.textContent = "";
-  //const auxCommunicationId = localStorage.getItem("agentCommunicationId");
-  if(globalCommunicationId === null){
-    console.warn("TIPIFICACION GLOBAL ");
-    tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
-    //tipificarInCall(conversationId, participantId, auxCommunicationId, wrapupCode, wrapupName, note.value);
-    //desconectar la interaccion
-    disconnectInteraction(conversationId, participantId);
-    //agregar a participant Data (respaldo por si nos piden esa info)
-  }
-  else {
-    tipificarInCall(conversationId, participantId, globalCommunicationId, wrapupCode, wrapupName, note.value);
-    //agregar a participant Data (respaldo por si nos piden esa info)
-  }
+//   // Si pasa la validación, limpiar el mensaje
+//   messageDiv.textContent = "";
+//   //const auxCommunicationId = localStorage.getItem("agentCommunicationId");
+//   if(globalCommunicationId === null){
+//     console.warn("TIPIFICACION GLOBAL ");
+//     tipificar(conversationId, participantId, wrapupCode, wrapupName, note.value);
+//     //tipificarInCall(conversationId, participantId, auxCommunicationId, wrapupCode, wrapupName, note.value);
+//     //desconectar la interaccion
+//     disconnectInteraction(conversationId, participantId);
+//     //agregar a participant Data (respaldo por si nos piden esa info)
+//   }
+//   else {
+//     tipificarInCall(conversationId, participantId, globalCommunicationId, wrapupCode, wrapupName, note.value);
+//     //agregar a participant Data (respaldo por si nos piden esa info)
+//   }
 
-  console.log("GLOBAL COMMUNICATION ID: " + globalCommunicationId + " CONVERSATIONID" + conversationId);
-  // Si el wrapup requiere fecha y la fecha está seleccionada, llamar createCallbackGateway
-  if (wrapupsQueRequierenFecha.includes(wrapupLabel) && callbackDatetime) {
-    createCallbackGateway();
-    messageDiv.textContent = "callback programado";
-    messageDiv.style.color = "black";
-  }
-};
+//   console.log("GLOBAL COMMUNICATION ID: " + globalCommunicationId + " CONVERSATIONID" + conversationId);
+//   // Si el wrapup requiere fecha y la fecha está seleccionada, llamar createCallbackGateway
+//   if (wrapupsQueRequierenFecha.includes(wrapupLabel) && callbackDatetime) {
+//     createCallbackGateway();
+//     messageDiv.textContent = "callback programado";
+//     messageDiv.style.color = "black";
+//   }
+// };
 
 document.getElementById('Callback').onclick = (e) => {
   e.preventDefault(); 
