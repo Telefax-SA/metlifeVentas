@@ -2,28 +2,39 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Colas del Usuario</title>
   <link rel="stylesheet" href="styles.css">
-	<!-- Genesys Cloud SDK -->
-	<script src="https://sdk-cdn.mypurecloud.com/javascript/227.0.0/purecloud-platform-client-v2.min.js"></script>
-	<script type="text/javascript">
-	// Obtain a reference to the platformClient object
-	const platformClient = require('platformClient');
-	</script>
+  
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- Genesys Cloud SDK -->
+  <script src="https://sdk-cdn.mypurecloud.com/javascript/227.0.0/purecloud-platform-client-v2.min.js"></script>
+  <script type="text/javascript">
+    const platformClient = require('platformClient');
+  </script>
 </head>
 <body>
-  <h1>Colas del Usuario</h1>
-  <div id="user-info"></div>
-  <div class="container">
-    <div class="queue-list">
-      <h2>Colas Activas</h2>
-      <ul id="active-queues"></ul>
-    </div>
-    <div class="queue-list">
-      <h2>Colas Inactivas</h2>
-      <ul id="inactive-queues"></ul>
+  <div class="card" style="max-width: 900px; margin: 20px auto;">
+    <h1 style="text-align: center; margin-bottom: 5px;">Colas del Usuario</h1>
+    <div id="user-info" style="text-align: center; color: var(--color-text-muted); margin-bottom: var(--spacing-xl);"></div>
+    
+    <div class="queues-container">
+      <div class="queue-list">
+        <h3>Colas Activas</h3>
+        <ul id="active-queues"></ul>
+      </div>
+      <div class="queue-list">
+        <h3>Colas Inactivas</h3>
+        <ul id="inactive-queues"></ul>
+      </div>
     </div>
   </div>
+
+  <script src="utils.js"></script>
+  <script src="auth.js"></script>
   <script src="activateQueues.js"></script>
 </body>
 </html>

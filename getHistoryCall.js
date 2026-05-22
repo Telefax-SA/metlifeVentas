@@ -1,18 +1,12 @@
+// getHistoryCall.js - Refactorizado para usar auth.js y utils.js
 const CLIENT_ID = '732d6aaf-a749-426f-8af2-7d6595c48a81';
 const REGION = 'sae1.pure.cloud';       
 const REDIRECT_URI = window.location.origin + window.location.pathname;
-// const contactId = window.location.href.split('?contactId=')[1];
-// const campaignId = window.location.href.split('?campaignId=')[1];
 const client = platformClient.ApiClient.instance;
 
-let codeVerifier = localStorage.getItem('code_verifier');
 client.setEnvironment(REGION);
-async function login() {
-  codeVerifier = generateCodeVerifier();
-  const codeChallenge = await generateCodeChallenge(codeVerifier);
-  localStorage.setItem('code_verifier', codeVerifier);
 
-  // Armamos el state como query string
+async function initLogin() {
   const contactId = urlParams.get('contactId') || '';
   const campaignId = urlParams.get('campaignId') || '';
   const participantId = urlParams.get('participantId') || '';
@@ -23,9 +17,6 @@ async function login() {
   const queueId =  urlParams.get('queueId') || '';
   const campaingName =  urlParams.get('campaingName') || '';
   const pending =  urlParams.get('pending') || '';
-  //const agentCommunicationId =  urlParams.get('agentCommunicationId') || '';
-  // const customerCommunicationId =  urlParams.get('customerCommunicationId') || '';
-
 
   const stateObj = new URLSearchParams();
   if (contactId) stateObj.append('contactId', contactId);
@@ -38,59 +29,12 @@ async function login() {
   if (queueId) stateObj.append('queueId', queueId);
   if (campaingName) stateObj.append('campaingName', campaingName);
   if (pending) stateObj.append('pending', pending);
-  //if (agentCommunicationId) stateObj.append('agentCommunicationId', agentCommunicationId);
-  // if (customerCommunicationId) stateObj.append('customerCommunicationId', customerCommunicationId);
-  
-  
-  // Podés agregar más parámetros al state así:
-  // stateObj.append('userType', 'cliente');
 
   const state = encodeURIComponent(stateObj.toString());
-
-  const url = `https://login.${REGION}/oauth/authorize?` +
-    `client_id=${CLIENT_ID}` +
-    `&response_type=code` +
-    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-    `&code_challenge=${codeChallenge}` +
-    `&code_challenge_method=S256` +
-    `&state=${state}`;
-
-  window.location.href = url;
+  const loginUrl = await getLoginUrl(CLIENT_ID, REGION, REDIRECT_URI, state);
+  window.location.href = loginUrl;
 }
 
-async function exchangeCodeForToken(code) {
-	const body = new URLSearchParams();
-	body.append('grant_type', 'authorization_code');
-	body.append('client_id', CLIENT_ID);
-	body.append('code', code);
-	body.append('redirect_uri', REDIRECT_URI);
-	body.append('code_verifier', codeVerifier);
-
-	const response = await fetch(`https://login.${REGION}/oauth/token`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-		body
-	});
-
-	const data = await response.json();
-	if (data.access_token) {
-		localStorage.setItem('access_token', data.access_token);
-		return data.access_token;
-	} else {
-		throw new Error('Error al obtener access token: ' + JSON.stringify(data));
-	}
-}
-
-function getIntervalLast30Days() {
-  const now = new Date();                 // fecha actual
-  const past = new Date();                 
-  past.setDate(now.getDate() - 30);        // 30 días atrás
-
-  const nowIso = now.toISOString();
-  const pastIso = past.toISOString();
-
-  return `${pastIso}/${nowIso}`;
-}
 
 async function getHistoryCalls(contactId) {
 	let access_token = localStorage.getItem('access_token');
@@ -129,7 +73,7 @@ async function getHistoryCalls(contactId) {
     const data = await formatearDatos(response.conversations || []);
     renderTabla(data);
   } catch (err) {
-    document.getElementById("tabla").innerText = "Error al buscar llamadas: " + err;
+    document.getElementById("tabla").innerText = "Error al buscar llamadas.";
     console.error(err);
   }
 }
@@ -316,11 +260,11 @@ if (code && rawState) {
     localStorage.setItem(key, value); // guarda contactId, campaignId, o cualquier otro
   }
 
-  exchangeCodeForToken(code)
+  exchangeCodeForToken(code, CLIENT_ID, REGION, REDIRECT_URI)
     .then(() => {
       history.replaceState(null, '', REDIRECT_URI); // limpia los parámetros de la URL
     })
-    .catch(err => alert('Error en login: ' + err.message));
+    .catch(err => showAlert('error', 'Error en login', err.message));
 }
 
 if (!window.__alreadyRan) {
@@ -328,7 +272,7 @@ if (!window.__alreadyRan) {
 
   (async () => {
     if (!code) {
-      await login(); 
+      await initLogin(); 
     } else {
       const contactId = localStorage.getItem('contactId');
       const campaignId = localStorage.getItem('campaignId');
@@ -453,10 +397,9 @@ document.getElementById("ventaButton").onclick = (e) =>{
   ventaButton.style.opacity = "0.5"; // baja opacidad para feedback visual
   const conversationId = localStorage.getItem('conversationId');
   const participantId = localStorage.getItem('participantId'); //deberia ser el participantID del customer
-  addInfoVenta(conversationId, participantId, getVentaData());
+  addTipificacionInfo(conversationId, participantId, getVentaData());
   addTagVenta(conversationId, "Venta");
-  alert("Datos guardados")
-  
+  showToast("success", "Datos guardados");
 }
 
 function getVentaData(){
@@ -543,7 +486,7 @@ function renderEditableTable(data, editableFields) {
         name: 'Valor', sort: false,
         formatter: (cell, row) => {
           const campo = row.cells[0].data;
-          const isEditable = editableFields.includes(campo) || campo === 'TelefonoObtendio';
+          const isEditable = editableFields.includes(campo) || campo === 'TelefonoObtenido';
 
           if (isEditable) {
             return gridjs.html(`
@@ -563,11 +506,12 @@ function renderEditableTable(data, editableFields) {
         sort: false,
         formatter: (_, row) => {
           const campo = row.cells[0].data;
-          if (campo === 'TelefonoObtendio') {
+          if (campo === 'TelefonoObtenido') {
             return gridjs.html(`
-              <button onclick="accionTelefonoObtendio()" 
-                      style=" border: none; cursor: pointer; padding: 4px;">
-                <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button onclick="accionTelefonoObtenido()" 
+                      class="btn-update"
+                      style="border: none; cursor: pointer; padding: 4px; border-radius: 4px;">
+                <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M22 16.92V21a2 2 0 0 1-2.18 2A19.72 19.72 0 0 1 3 5.18 2 2 0 0 1 5 3h4.09a1 1 0 0 1 1 .75l1.38 5.52a1 1 0 0 1-.27.95L9.91 12.09a16 16 0 0 0 6 6l1.87-1.87a1 1 0 0 1 .95-.27l5.52 1.38a1 1 0 0 1 .75 1z"/>
                 </svg>
               </button>
@@ -589,8 +533,8 @@ function renderEditableTable(data, editableFields) {
   }).render(container);
 }
 
-function accionTelefonoObtendio() {
-  const input = document.querySelector('input[data-campo="TelefonoObtendio"]');
+function accionTelefonoObtenido() {
+  const input = document.querySelector('input[data-campo="TelefonoObtenido"]');
   if (input) {
     const phone = input.value;
     let apiInstance = new platformClient.ConversationsApi();
@@ -601,13 +545,17 @@ function accionTelefonoObtendio() {
       "phoneColumn": "telefono obtenido"
     };
 
+    showToast('info', 'Guardando teléfono...');
+
     apiInstance.postConversationsCall(conversationId, body)
       .then((data) => {
         console.log(`postConversationsCall success! data: ${JSON.stringify(data, null, 2)}`);
+        showToast('success', 'Teléfono guardado con éxito.');
       })
       .catch((err) => {
         console.log("There was a failure calling postConversationsCall");
         console.error(err);
+        showAlert('error', 'Error', 'Ocurrió un error al guardar el teléfono.');
       });
     }
 }
@@ -687,23 +635,15 @@ function updateContact(contactListId, contactId, body, data){
   apiIntegration.postIntegrationsActionExecute(actionId, JSON.parse(JSON.stringify(body2)), opts)
   .then((data) => {
     console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
-    updateContactMessage(true, "✅ La base se actualizó correctamente.")
+    showToast('success', 'La base se actualizó correctamente.');
   })
   .catch((err) => {
     console.log("There was a failure calling postIntegrationsActionExecute");
     console.error(err);
-    updateContactMessage(false, "❌ Ocurrió un error al actualizar la base." + err)
+    showAlert('error', 'Error', 'Ocurrió un error al actualizar la base: ' + err);
   });
 }
 
-function updateContactMessage(success, msgTXT){
-  const messageDiv = document.getElementById('update-message');
-  const msg = document.createElement("div");
-  msg.textContent = msgTXT
-  msg.style.color = success ? "green" : "red";
-  messageDiv.innerHTML = "";
-  messageDiv.appendChild(msg);
-}
 
 //custom_-_773503e5-ab4f-4859-9b5e-46a252aea088
 function tipificar(conversationId, participantId, wrapupCode, wrapupName, note) {
@@ -855,24 +795,15 @@ function createCallback(userId, userName, queueId, scheduleTime, scriptId, callb
     .then((data) => {
       console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
       if(data.statusCode == "200")
-        updateCallbackMessage(true, "Callback creado correctamente")
+        showToast('success', 'Callback creado correctamente');
       else
-        updateCallbackMessage(true, data.body.message)
+        showAlert('warning', 'Aviso', data.body.message);
     })
     .catch((err) => {
       console.log("There was a failure calling postIntegrationsActionExecute");
       console.error(err);
-      updateCallbackMessage(false, "Ocuarrio un error al crear el callback " + err)
+      showAlert('error', 'Error', 'Ocurrió un error al crear el callback: ' + err);
   });
-}
-
-function updateCallbackMessage(success, msgTXT){
-  const messageDiv = document.getElementById('callback-message');
-  const msg = document.createElement("div");
-  msg.textContent = msgTXT
-  msg.style.color = success ? "green" : "red";
-  messageDiv.innerHTML = "";
-  messageDiv.appendChild(msg);
 }
 
 //custom_-_0cf03a38-50e4-41d8-be9d-29dbe0f47ecc
