@@ -4,62 +4,29 @@ const REDIRECT_URI = window.location.origin + window.location.pathname;
 
 const client = platformClient.ApiClient.instance;
 client.setEnvironment(REGION);
-let codeVerifier = localStorage.getItem('code_verifier');
-
-async function login() {
-  codeVerifier = generateCodeVerifier();
-  const codeChallenge = await generateCodeChallenge(codeVerifier);
-  localStorage.setItem('code_verifier', codeVerifier);
-
-  const url = `https://login.${REGION}/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
-  window.location.href = url;
-}
-
-async function exchangeCodeForToken(code) {
-  const body = new URLSearchParams();
-  body.append('grant_type', 'authorization_code');
-  body.append('client_id', CLIENT_ID);
-  body.append('code', code);
-  body.append('redirect_uri', REDIRECT_URI);
-  body.append('code_verifier', codeVerifier);
-
-  const response = await fetch(`https://login.${REGION}/oauth/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body
-  });
-
-  const data = await response.json();
-  if (data.access_token) {
-    localStorage.setItem('access_token', data.access_token);
-    return data.access_token;
-  } else {
-    throw new Error('Error al obtener token: ' + JSON.stringify(data));
-  }
-}
-
-function generateCodeVerifier() {
-  const array = new Uint32Array(56);
-  window.crypto.getRandomValues(array);
-  return btoa(Array.from(array, dec => String.fromCharCode(dec % 256)).join('')).replace(/=/g, '');
-}
-
-async function generateCodeChallenge(verifier) {
-  const data = new TextEncoder().encode(verifier);
-  const digest = await crypto.subtle.digest('SHA-256', data);
-  return btoa(String.fromCharCode(...new Uint8Array(digest)))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
 
 async function init() {
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('code')) {
-    const token = await exchangeCodeForToken(urlParams.get('code'));
-    client.setAccessToken(token);
-    history.replaceState(null, '', REDIRECT_URI);
-    startApp();
+  const code = urlParams.get('code');
+
+  if (code) {
+    try {
+      showLoading('Iniciando sesión...');
+      const token = await exchangeCodeForToken(code, CLIENT_ID, REGION, REDIRECT_URI);
+      client.setAccessToken(token);
+      history.replaceState(null, '', REDIRECT_URI);
+      closeLoading();
+      startApp();
+    } catch (err) {
+      closeLoading();
+      showAlert('error', 'Error', 'Fallo al iniciar sesión: ' + err.message);
+    }
+  } else if (!localStorage.getItem('access_token')) {
+    const loginUrl = await getLoginUrl(CLIENT_ID, REGION, REDIRECT_URI);
+    window.location.href = loginUrl;
   } else {
-    await login();
+    client.setAccessToken(localStorage.getItem('access_token'));
+    startApp();
   }
 }
 
@@ -67,52 +34,69 @@ async function startApp() {
   const usersApi = new platformClient.UsersApi();
   const routingApi = new platformClient.RoutingApi();
 
-  const me = await usersApi.getUsersMe();
-  const userId = me.id;
+  try {
+    const me = await usersApi.getUsersMe();
+    const userId = me.id;
 
-  document.getElementById("user-info").innerText = `Usuario: ${me.name}`;
-  let opts = { 
-  	"pageSize": 25,
-  	"pageNumber": 1
-	};
+    document.getElementById("user-info").innerHTML = `<h2>👤 ${me.name}</h2>`;
+    let opts = { 
+      "pageSize": 25,
+      "pageNumber": 1
+    };
 
-  const queues = await routingApi.getUserQueues(userId, opts);
-  let activeQueue = queues.entities.find(q => q.joined);
-  const inactiveQueues = queues.entities.filter(q => !q.joined);
+    const queues = await routingApi.getUserQueues(userId, opts);
+    let activeQueue = queues.entities.find(q => q.joined);
+    const inactiveQueues = queues.entities.filter(q => !q.joined);
 
-	renderQueueList('active-queues', activeQueue ? [activeQueue] : [], 'Desactivar', async (queue) => {
-		// await routingApi.patchUserQueues(userId, [
-		// 	{ id: queue.id, joined: false }
-		// ], {});
-    activateQueues(userId, queue.id, false);
-		startApp();
-	});
+    renderQueueList('active-queues', activeQueue ? [activeQueue] : [], 'Desactivar', async (queue) => {
+      activateQueues(userId, queue.id, false);
+      startApp();
+    }, 'btn-danger');
 
-	renderQueueList('inactive-queues', inactiveQueues, 'Activar', async (queue) => {
-		const patchBody = [];
-		if (activeQueue) {
-			patchBody.push({ id: activeQueue.id, joined: false });
-		}
-		patchBody.push({ id: queue.id, joined: true });
+    renderQueueList('inactive-queues', inactiveQueues, 'Activar', async (queue) => {
+      const patchBody = [];
+      if (activeQueue) {
+        patchBody.push({ id: activeQueue.id, joined: false });
+      }
+      patchBody.push({ id: queue.id, joined: true });
 
-		//await routingApi.patchUserQueues(userId, patchBody, {});
-    activateQueues(userId, queue.id, true);
-		startApp();
-	});
+      activateQueues(userId, queue.id, true);
+      startApp();
+    });
+  } catch (error) {
+    console.error("Error al cargar colas:", error);
+    if (error.status === 401) {
+      localStorage.removeItem('access_token');
+      const loginUrl = await getLoginUrl(CLIENT_ID, REGION, REDIRECT_URI);
+      window.location.href = loginUrl;
+    } else {
+      showAlert('error', 'Error', 'No se pudieron cargar las colas del usuario.');
+    }
+  }
 }
 
-function renderQueueList(containerId, queues, buttonText, buttonHandler) {
+function renderQueueList(containerId, queues, buttonText, buttonHandler, extraClass = '') {
   const ul = document.getElementById(containerId);
   ul.innerHTML = "";
+  
+  if (queues.length === 0) {
+    ul.innerHTML = '<li style="color: var(--color-text-muted); justify-content: center;">No hay colas aquí</li>';
+    return;
+  }
+
   queues.forEach(queue => {
     const li = document.createElement('li');
     li.textContent = queue.name;
     const btn = document.createElement('button');
     btn.textContent = buttonText;
+    if (extraClass) btn.classList.add(extraClass);
+    
     btn.onclick = async () => {
-			disableAllButtonsTemporarily(1000);
-			await buttonHandler(queue);
-		};
+      disableAllButtonsTemporarily(1000);
+      showToast('info', 'Actualizando estado...');
+      await buttonHandler(queue);
+    };
+    
     li.appendChild(btn);
     ul.appendChild(li);
   });
@@ -126,27 +110,25 @@ function disableAllButtonsTemporarily(ms) {
   }, ms);
 }
 
-//custom_-_d2b5c2bb-6a23-4531-88dc-f49eb3b1b9e1
 function activateQueues(userId, queueId, active){
   let apiIntegration = new platformClient.IntegrationsApi();
   let actionId = "custom_-_d2b5c2bb-6a23-4531-88dc-f49eb3b1b9e1"; 
-  let opts = { 
-    "flatten": false 
-  };
+  let opts = { "flatten": false };
   let body = { 
     "queuesIds": queueId,
     "userId": userId,
-    "active":active
+    "active": active
   };
 
   apiIntegration.postIntegrationsActionExecute(actionId, body, opts)
-    .then((data) => {
-      console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data, null, 2)}`);
+    .then(() => {
+      showToast('success', active ? 'Cola activada' : 'Cola desactivada');
     })
     .catch((err) => {
-      console.log("There was a failure calling postIntegrationsActionExecute");
       console.error(err);
-  });
+      showAlert('error', 'Error', 'Ocurrió un error al cambiar el estado de la cola.');
+    });
 }
 
+// Iniciar aplicación
 init();
