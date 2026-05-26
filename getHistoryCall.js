@@ -1,4 +1,7 @@
 // getHistoryCall.js - Refactorizado para usar auth.js y utils.js
+// platformClient se carga desde el CDN como global (window.platformClient)
+const platformClient = window.platformClient;
+
 const CLIENT_ID = '732d6aaf-a749-426f-8af2-7d6595c48a81';
 const REGION = 'sae1.pure.cloud';       
 const REDIRECT_URI = window.location.origin + window.location.pathname;

@@ -1,39 +1,356 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Callbacks pendientes</title>
-  
-  <!-- Estilos base -->
-  <link rel="stylesheet" href="styles.css" />
-  
-  <!-- SweetAlert2 (Toasts/Alerts) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
-  <!-- Grid.js CSS y JS desde CDN -->
-  <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
-  <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
-  
-  <!-- Flatpickr CSS y JS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Desktop</title>
+
+<link rel="stylesheet" href="styles.css">
+
+<!-- Genesys Cloud SDK -->
+<script src="https://sdk-cdn.mypurecloud.com/javascript/227.0.0/purecloud-platform-client-v2.min.js"></script>
+<script type="text/javascript">
+//const platformClient = require('platformClient');
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+
+<!-- SweetAlert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+<!-- Flatpickr CSS y JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<style>
+  /* Local specific overrides if any (most moved to styles.css) */
+  #formContainer { margin: 0; }
+  .update-message, .callback-message { margin-top: 10px; font-size: 0.9rem; }
+  #callback-form { display: flex; flex-direction: column; gap: var(--spacing-md); }
+  #callback-form label { display: flex; align-items: center; gap: 8px; font-weight: 500;}
+</style>
 </head>
 <body>
-  <div class="parent" style="display: block; height: auto;">
-    <div class="card" style="margin-top: var(--spacing-xl);">
-      <div class="div1" style="margin-bottom: var(--spacing-md);">
-        <h2>Callbacks pendientes</h2>
-      </div>
-      
-      <!-- Se cambio label por div por semantica -->
-      <div id="output"></div>
+<div class="parent">
+  <div class="div1">
+    <div id="campanaTitle">
+      <h2 style="margin: 0; color: var(--color-primary);">Campaña</h2>
     </div>
+    <button id="btn-refresh" class="btn-refresh" title="Recargar aplicación">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 4v6h-6"></path>
+        <path d="M1 20v-6h6"></path>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </svg>
+      <span>Actualizar</span>
+    </button>
+  </div>
+  
+  <div class="div2 card">
+    <h3 style="margin-bottom: var(--spacing-md); color: var(--color-primary);">Datos del Cliente</h3>
+    <form id="formContainer" autocomplete="off">
+      <div class="form-grid">
+
+        <div class="field-wrapper">
+          <label for="nombres">Nombres</label>
+          <input type="text" id="nombres" name="nombres" placeholder="Nombres" />
+          <div class="error-tooltip" id="nombres-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="apellidos">Apellidos</label>
+          <input type="text" id="apellidos" name="apellidos" placeholder="Apellidos" />
+          <div class="error-tooltip" id="apellidos-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="ci">Cédula de Identidad</label>
+          <input type="text" id="ci" name="ci" placeholder="C.I." />
+          <div class="error-tooltip" id="ci-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="fechaNacimiento">Fecha de nacimiento</label>
+          <input type="date" id="fechaNacimiento" name="fechaNacimiento" placeholder="Fecha de nacimiento" />
+          <div class="error-tooltip" id="fechaNacimiento-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="direccion">Dirección</label>
+          <input type="text" id="direccion" name="direccion" placeholder="Dirección" />
+          <div class="error-tooltip" id="direccion-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="departamento">Departamento</label>
+          <select id="departamento" name="departamento">
+            <option value="" disabled selected>Departamento</option>
+            <option>Artigas</option>
+            <option>Canelones</option>
+            <option>Cerro Largo</option>
+            <option>Colonia</option>
+            <option>Durazno</option>
+            <option>Flores</option>
+            <option>Florida</option>
+            <option>Lavalleja</option>
+            <option>Maldonado</option>
+            <option>Montevideo</option>
+            <option>Paysandú</option>
+            <option>Río Negro</option>
+            <option>Rivera</option>
+            <option>Rocha</option>
+            <option>Salto</option>
+            <option>San José</option>
+            <option>Soriano</option>
+            <option>Tacuarembó</option>
+            <option>Treinta y Tres</option>
+          </select>
+          <div class="error-tooltip" id="departamento-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="localidad">Localidad</label>
+          <input type="text" id="localidad" name="localidad" placeholder="Localidad" />
+          <div class="error-tooltip" id="localidad-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="codigoPostal">Código Postal</label>
+          <input type="text" id="codigoPostal" name="codigoPostal" placeholder="Código Postal" />
+          <div class="error-tooltip" id="codigoPostal-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="telefono1">Teléfono 1</label>
+          <input type="text" id="telefono1" name="telefono1" placeholder="Teléfono 1" />
+          <div class="error-tooltip" id="telefono1-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="telefono2">Teléfono 2</label>
+          <input type="text" id="telefono2" name="telefono2" placeholder="Teléfono 2" />
+          <div class="error-tooltip" id="telefono2-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="telefono3">Teléfono 3</label>
+          <input type="text" id="telefono3" name="telefono3" placeholder="Teléfono 3" />
+          <div class="error-tooltip" id="telefono3-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="telefono4">Teléfono 4</label>
+          <input type="text" id="telefono4" name="telefono4" placeholder="Teléfono 4" />
+          <div class="error-tooltip" id="telefono4-error"></div>
+        </div>
+
+        <div class="field-wrapper">
+          <label for="email" style="grid-column: 1 / -1;">Email</label>
+          <input type="email" id="email" name="email" placeholder="Email" />
+          <div class="error-tooltip" id="email-error"></div>
+        </div>
+      </div>
+      <button id="ventaButton" disabled style="width: 100%; margin-top: var(--spacing-md);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        Guardar Datos
+      </button>
+    </form>
   </div>
 
-  <script src="utils.js"></script>
-  <script src="auth.js"></script>
-  <script src="logic.js"></script>
+  <div class="div3 card">
+    <h3 style="margin-bottom: var(--spacing-md); color: var(--color-primary);">Información Adicional</h3>
+    <div id="gridjs-table" class="grid-table"></div>
+    <button class="btn-update" id="update-table" style="width: 100%; margin-top: var(--spacing-md);">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+      Actualizar Base
+    </button>
+    <div id="update-message" class="update-message"></div>
+  </div>
+
+  <div class="div4 card">
+    <h3 style="margin-bottom: var(--spacing-md); color: var(--color-primary);">Historial de Interacciones</h3>
+    <div id="tabla">Cargando historial...</div>
+  </div>
+
+  <div class="div6 card">
+    <h3 style="margin-bottom: var(--spacing-md); color: var(--color-primary);">Agendar Callback</h3>
+    <form id="callback-form">
+      <div class="field-wrapper" style="margin-bottom: 0;">
+        <input type="datetime-local" id="callback-datetime" name="callback-datetime" />
+      </div>
+      <label>
+        <input type="checkbox" id="checkboxOwner" name="checkboxOwner" /> 
+        Dueño del Callback
+      </label>
+      <div class="field-wrapper" style="margin-bottom: 0;">
+        <select id="AgenteCall" name="AgenteCallback" style="display: none;"></select>
+      </div>
+      <button id="Callback" type="submit" style="width: 100%;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Agendar Callback
+      </button>
+      <div id="callback-message" class="callback-message"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const fields = {
+    nombres: {
+      element: document.getElementById('nombres'),
+      errorElement: document.getElementById('nombres-error'),
+      rules: [
+        { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+        { validate: val => /^(?! ).*(?<! )$/.test(val), message: 'No se permiten espacios al inicio/final.' },
+        { validate: val => /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]*$/.test(val), message: 'Solo letras y espacios.' },
+        { validate: val => /^.{0,40}$/.test(val), message: 'Máximo 40 caracteres.' },
+      ]
+    },
+    apellidos: {
+      element: document.getElementById('apellidos'),
+      errorElement: document.getElementById('apellidos-error'),
+      rules: [
+        { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+        { validate: val => /^(?! ).*(?<! )$/.test(val), message: 'No se permiten espacios al inicio/final.' },
+        { validate: val => /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]*$/.test(val), message: 'Solo letras y espacios.' },
+        { validate: val => /^.{0,40}$/.test(val), message: 'Máximo 40 caracteres.' },
+      ]
+    },
+    ci: {
+      element: document.getElementById('ci'),
+      errorElement: document.getElementById('ci-error'),
+      rules: [
+        { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+        { validate: val => /^[0-9.\\-]{7,8}$/.test(val), message: 'Debe tener entre 7 y 8 caracteres.' },
+      ]
+    },
+    fechaNacimiento: {
+      element: document.getElementById('fechaNacimiento'),
+      errorElement: document.getElementById('fechaNacimiento-error'),
+      rules: [
+        { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+      ]
+    },
+    direccion: {
+      element: document.getElementById('direccion'),
+      errorElement: document.getElementById('direccion-error'),
+      rules: [
+        { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+        { validate: val => /^(?! ).*(?<! )$/.test(val), message: 'No se permiten espacios al inicio/final.' },
+        { validate: val => /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 ]*$/.test(val), message: 'No se permiten símbolos.' },
+        { validate: val => /^.{0,70}$/.test(val), message: 'Máximo 70 caracteres.' },
+      ]
+    },
+    departamento: {
+      element: document.getElementById('departamento'),
+      errorElement: document.getElementById('departamento-error'),
+      rules: [
+        { validate: val => val !== '', message: 'Seleccione un departamento.' },
+      ]
+    },
+    localidad: {
+      element: document.getElementById('localidad'),
+      errorElement: document.getElementById('localidad-error'),
+      rules: [
+        { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+        { validate: val => /^.{0,70}$/.test(val), message: 'Máximo 70 caracteres.' },
+        { validate: val => /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]*$/.test(val), message: 'Solo letras y espacios.' },
+        { validate: val => /^(?! ).*(?<! )$/.test(val), message: 'No se permiten espacios al inicio/final.' },
+      ]
+    },
+    codigoPostal: {
+      element: document.getElementById('codigoPostal'),
+      errorElement: document.getElementById('codigoPostal-error'),
+      rules: [
+        { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+        { validate: val => /^[0-9]{1,6}$/.test(val), message: 'Entre 1 y 6 dígitos.' },
+      ]
+    },
+    telefono1: {
+      element: document.getElementById('telefono1'),
+      errorElement: document.getElementById('telefono1-error'),
+      rules: [
+        { validate: val => /^\d{8,10}$/.test(val), message: 'Entre 8 y 10 dígitos.' },
+      ]
+    },
+    telefono2: {
+      element: document.getElementById('telefono2'),
+      errorElement: document.getElementById('telefono2-error'),
+      rules: [
+        { validate: val => val === '' || /^\d{8,10}$/.test(val), message: 'Entre 8 y 10 dígitos.' },
+      ]
+    },
+    telefono3: {
+      element: document.getElementById('telefono3'),
+      errorElement: document.getElementById('telefono3-error'),
+      rules: [
+        { validate: val => val === '' || /^\d{8,10}$/.test(val), message: 'Entre 8 y 10 dígitos.' },
+      ]
+    },
+    telefono4: {
+      element: document.getElementById('telefono4'),
+      errorElement: document.getElementById('telefono4-error'),
+      rules: [
+        { validate: val => val === '' || /^\d{8,10}$/.test(val), message: 'Entre 8 y 10 dígitos.' },
+      ]
+    },
+    email: {
+      element: document.getElementById('email'),
+      errorElement: document.getElementById('email-error'),
+      rules: [
+        { validate: val => val.trim() !== '', message: 'Este campo es requerido.' },
+        { validate: val => /^[^@]+@[^@]+\.[a-z]{2,}$/.test(val), message: 'Formato de email inválido.' },
+      ]
+    },
+  };
+
+  const submitBtn = document.getElementById('ventaButton');
+
+  function validateField(field) {
+    const value = field.element.value;
+    const messages = [];
+    field.rules.forEach(rule => {
+      if (!rule.validate(value)) {
+        messages.push(rule.message);
+      }
+    });
+    field.errorElement.innerHTML = messages.map(msg => `<div>${msg}</div>`).join('');
+    field.errorElement.style.display = messages.length ? 'block' : 'none';
+    
+    if (messages.length) {
+      field.element.style.borderColor = 'var(--color-text-error)';
+    } else {
+      field.element.style.borderColor = 'var(--border-color)';
+    }
+    
+    return messages.length === 0;
+  }
+
+  function validateAll() {
+    let allValid = true;
+    for (const key in fields) {
+      const valid = validateField(fields[key]);
+      if (!valid) allValid = false;
+    }
+
+    submitBtn.disabled = !allValid;
+  }
+
+  for (const key in fields) {
+    const field = fields[key];
+    field.element.addEventListener('input', () => {
+      validateField(field);
+      validateAll();
+    });
+  }
+</script>
+
+<script type="module" src="utils.js"></script>
+<script type="module" src="auth.js"></script>
+<script type="module" src="getHistoryCall.js"></script>
+
 </body>
 </html>
