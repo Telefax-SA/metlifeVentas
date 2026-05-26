@@ -447,7 +447,7 @@ async function getContactData(contactId, campaignId){
   apiIntegration.postIntegrationsActionExecute(actionId, body, opts)
   .then((data) => {
     console.log(`postIntegrationsActionExecute success! data: ${JSON.stringify(data.body, null, 2)}`);
-    const editableFields = ['Direccion', 'Fecha Nacimiento', 'Telefono1', 'Telefono2', 'TelefonoObtenido', 'Auxiliar'];
+    const editableFields = ['Direccion', 'Fecha Nacimiento', 'Telefono1', 'Telefono2', 'TelefonoObtenido', 'TelefonoObtendio', 'Auxiliar'];
     const tableData = parseMarkdownTable(data.body.markdownTable);
 
     PhoneNumbers = (data.body.phoneValues || [])
@@ -467,9 +467,13 @@ async function getContactData(contactId, campaignId){
 }
 
 function parseMarkdownTable(md) {
+  const fieldNameFixes = { 'TelefonoObtendio': 'TelefonoObtenido' };
   const lines = md.trim().split('\n').slice(2); // quitamos cabecera y separadores
   const data = lines.map(line => {
     const parts = line.split('|').map(cell => cell.trim()).filter(Boolean);
+    if (parts[0] && fieldNameFixes[parts[0]]) {
+      parts[0] = fieldNameFixes[parts[0]];
+    }
     return parts;
   });
   return data;
@@ -486,7 +490,7 @@ function renderEditableTable(data, editableFields) {
         name: 'Valor', sort: false,
         formatter: (cell, row) => {
           const campo = row.cells[0].data;
-          const isEditable = editableFields.includes(campo) || campo === 'TelefonoObtenido';
+          const isEditable = editableFields.includes(campo) || campo === 'TelefonoObtenido' || campo === 'TelefonoObtendio';
 
           if (isEditable) {
             return gridjs.html(`
@@ -506,7 +510,7 @@ function renderEditableTable(data, editableFields) {
         sort: false,
         formatter: (_, row) => {
           const campo = row.cells[0].data;
-          if (campo === 'TelefonoObtenido') {
+          if (campo === 'TelefonoObtenido' || campo === 'TelefonoObtendio') {
             return gridjs.html(`
               <button onclick="accionTelefonoObtenido()" 
                       class="btn-update"
@@ -534,7 +538,7 @@ function renderEditableTable(data, editableFields) {
 }
 
 function accionTelefonoObtenido() {
-  const input = document.querySelector('input[data-campo="TelefonoObtenido"]');
+  const input = document.querySelector('input[data-campo="TelefonoObtenido"]') || document.querySelector('input[data-campo="TelefonoObtendio"]');
   if (input) {
     const phone = input.value;
     let apiInstance = new platformClient.ConversationsApi();
