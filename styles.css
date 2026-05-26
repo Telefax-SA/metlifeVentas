@@ -202,6 +202,37 @@ input::placeholder, textarea::placeholder {
 }
 
 .div1 { grid-area: header; display: flex; align-items: center; justify-content: space-between;}
+.btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background-color: var(--color-bg-card);
+  color: var(--color-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+.btn-refresh:hover {
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.btn-refresh:active {
+  transform: translateY(0);
+}
+.btn-refresh svg {
+  transition: transform 0.4s ease;
+}
+.btn-refresh:hover svg {
+  transform: rotate(180deg);
+}
 .div2 { grid-area: form; }
 .div3 { grid-area: table; }
 .div4 { grid-area: history; }

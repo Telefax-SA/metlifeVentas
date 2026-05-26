@@ -75,6 +75,7 @@ async function getHistoryCalls(contactId) {
   } catch (err) {
     document.getElementById("tabla").innerText = "Error al buscar llamadas.";
     console.error(err);
+    handleLoadError("Historial de llamadas", err);
   }
 }
 
@@ -267,8 +268,40 @@ if (code && rawState) {
     .catch(err => showAlert('error', 'Error en login', err.message));
 }
 
+function handleLoadError(errorContext, errorDetail) {
+  console.error(`[Error de Carga] ${errorContext}:`, errorDetail);
+  
+  const retryCount = parseInt(sessionStorage.getItem('auto_refresh_retry_count') || '0', 10);
+  
+  if (retryCount < 2) {
+    sessionStorage.setItem('auto_refresh_retry_count', retryCount + 1);
+    console.warn(`Intento de recarga automática ${retryCount + 1}/2 debido a error en: ${errorContext}`);
+    
+    showToast('info', 'Reconectando con Genesys...');
+    
+    setTimeout(() => {
+      window.location.reload();
+    }, 1200);
+  } else {
+    console.error("Se alcanzó el límite máximo de recargas automáticas. Se requiere refresco manual.");
+    showAlert('error', 'Error de Conexión', 'Hubo problemas para cargar los datos de Genesys. Hacé clic en "Actualizar" para reintentar.');
+  }
+}
+
 if (!window.__alreadyRan) {
   window.__alreadyRan = true;
+
+  // Manejador para el botón de actualizar
+  const btnRefresh = document.getElementById('btn-refresh');
+  if (btnRefresh) {
+    btnRefresh.onclick = () => {
+      sessionStorage.setItem('auto_refresh_retry_count', '0');
+      showLoading('Actualizando datos...');
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    };
+  }
 
   (async () => {
     if (!code) {
@@ -279,22 +312,31 @@ if (!window.__alreadyRan) {
       const userId = localStorage.getItem("userId")
       const campaingName = localStorage.getItem("campaingName")
       const pending = localStorage.getItem("pending")
-      suscribirseATopic(userId);
-      await getHistoryCalls(contactId);
-      await getContactData(contactId, campaignId);
-      //await getWrapUpCodes("*");
-      await getUsersByDivision("Home");
+      
+      try {
+        suscribirseATopic(userId);
+        await getHistoryCalls(contactId);
+        await getContactData(contactId, campaignId);
+        //await getWrapUpCodes("*");
+        await getUsersByDivision("Home");
 
-      const title = document.getElementById("campanaTitle");
-      const miSelect = document.getElementById('AgenteCall');
-      miSelect.value = userId;
+        const title = document.getElementById("campanaTitle");
+        const miSelect = document.getElementById('AgenteCall');
+        if (miSelect) miSelect.value = userId;
 
-      if (pending) {
-        title.innerHTML = `<span style="color:#e53935;">Pendiente de campaña ${campaingName}</span>`;
-      } else {
-        title.textContent = campaingName;
+        if (title) {
+          if (pending) {
+            title.innerHTML = `<span style="color:#e53935;">Pendiente de campaña ${campaingName}</span>`;
+          } else {
+            title.textContent = campaingName;
+          }
+        }
+        
+        // Reset retry count on successful load
+        sessionStorage.setItem('auto_refresh_retry_count', '0');
+      } catch (err) {
+        handleLoadError("Carga de datos inicial", err);
       }
-
     }
   })();
 }
@@ -472,6 +514,7 @@ async function getContactData(contactId, campaignId){
   .catch((err) => {
     console.log("There was a failure calling postIntegrationsActionExecute");
     console.error(err);
+    handleLoadError("Datos del Contacto", err);
   });
 }
 
@@ -500,17 +543,18 @@ function renderEditableTable(data, editableFields) {
         formatter: (cell, row) => {
           const campo = row.cells[0].data;
           const isEditable = editableFields.includes(campo) || campo === 'TelefonoObtenido' || campo === 'TelefonoObtendio';
+          const safeValue = (cell === undefined || cell === null || String(cell).trim() === 'undefined' || String(cell).trim() === 'null') ? '' : cell;
 
           if (isEditable) {
             return gridjs.html(`
               <input type="text" 
-                     value="${cell}" 
+                     value="${safeValue}" 
                      data-campo="${campo}" 
                      style="width:90%; padding:4px; border-radius:3px; border:1px solid #A7A8AA;" />
             `);
           }
 
-          return cell;
+          return safeValue;
         }
       },
       {
@@ -777,6 +821,7 @@ async function getUsersByDivision(divisionName) {
   .catch((err) => {
     console.log("There was a failure calling postIntegrationsActionExecute");
     console.error(err);
+    handleLoadError("Usuarios por división", err);
   });
 }
 
