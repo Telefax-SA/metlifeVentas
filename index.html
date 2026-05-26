@@ -10,7 +10,9 @@
 <!-- Genesys Cloud SDK -->
 <script src="https://sdk-cdn.mypurecloud.com/javascript/227.0.0/purecloud-platform-client-v2.min.js"></script>
 <script type="text/javascript">
-//const platformClient = require('platformClient');
+  if (typeof require === 'function') {
+    window.platformClient = require('platformClient');
+  }
 </script>
 
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">

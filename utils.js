@@ -111,3 +111,12 @@ function closeLoading() {
     Swal.close();
   }
 }
+
+// Expose functions globally for cross-module access in browser / bundled environment
+window.getNewDate = getNewDate;
+window.getIntervalLast30Days = getIntervalLast30Days;
+window.showToast = showToast;
+window.showAlert = showAlert;
+window.showConfirm = showConfirm;
+window.showLoading = showLoading;
+window.closeLoading = closeLoading;

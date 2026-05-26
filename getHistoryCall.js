@@ -1,6 +1,6 @@
 // getHistoryCall.js - Refactorizado para usar auth.js y utils.js
-// platformClient se carga desde el CDN como global (window.platformClient)
-const platformClient = window.platformClient;
+// platformClient se carga desde el CDN como global (window.platformClient) o usando require()
+const platformClient = window.platformClient || (typeof window.require === 'function' ? window.require('platformClient') : null);
 
 const CLIENT_ID = '732d6aaf-a749-426f-8af2-7d6595c48a81';
 const REGION = 'sae1.pure.cloud';       
@@ -1069,3 +1069,36 @@ function disconnectInteraction(conversationId, participantId){
     console.error(err);
   });
 }
+
+// Expose functions globally for cross-module access in browser / bundled environment
+window.initLogin = initLogin;
+window.getHistoryCalls = getHistoryCalls;
+window.formatearDatos = formatearDatos;
+window.renderTabla = renderTabla;
+window.sumarTTalkComplete = sumarTTalkComplete;
+window.obtenerDnis = obtenerDnis;
+window.obtenerWrapups = obtenerWrapups;
+window.obtenerNombresAgentes = obtenerNombresAgentes;
+window.resolveWrapupCodesArray = resolveWrapupCodesArray;
+window.handleLoadError = handleLoadError;
+window.createCallbackGateway = createCallbackGateway;
+window.getVentaData = getVentaData;
+window.getContactData = getContactData;
+window.parseMarkdownTable = parseMarkdownTable;
+window.renderEditableTable = renderEditableTable;
+window.accionTelefonoObtenido = accionTelefonoObtenido;
+window.autocompleteForm = autocompleteForm;
+window.getTableDataObject = getTableDataObject;
+window.updateContact = updateContact;
+window.tipificar = tipificar;
+window.tipificarInCall = tipificarInCall;
+window.getWrapUpCodes = getWrapUpCodes;
+window.getUsersByDivision = getUsersByDivision;
+window.createCallback = createCallback;
+window.addInfoVenta = addInfoVenta;
+window.addTipificacionInfo = addTipificacionInfo;
+window.addTagVenta = addTagVenta;
+window.habilitarBotonTipificar = habilitarBotonTipificar;
+window.procesarEvento = procesarEvento;
+window.suscribirseATopic = suscribirseATopic;
+window.disconnectInteraction = disconnectInteraction;
