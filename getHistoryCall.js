@@ -362,6 +362,12 @@ document.getElementById('Callback').onclick = (e) => {
 }
   
 function createCallbackGateway(){
+  const datePicker = document.getElementById("callback-datetime");
+  if (!datePicker || !datePicker.value) {
+    showAlert('warning', 'Fecha requerida', 'Por favor, selecciona una fecha y hora para agendar el callback.');
+    return;
+  }
+
   let userId = localStorage.getItem('userId');
   let userName = localStorage.getItem('userName');
   const queueId = localStorage.getItem('queueId');
@@ -370,12 +376,15 @@ function createCallbackGateway(){
   const contactId = localStorage.getItem('contactId');
   const conversationId = localStorage.getItem('conversationId');
   const participantId = localStorage.getItem('participantId');
-  const datePicker = document.getElementById("callback-datetime");
 
   const checkboxOwner = document.getElementById("checkboxOwner");
 
   if (checkboxOwner.checked) {
     const dropDown = document.getElementById("AgenteCall");
+    if (!dropDown || !dropDown.value) {
+      showAlert('warning', 'Agente requerido', 'Por favor, selecciona un agente de la lista para asignarlo como dueño.');
+      return;
+    }
     userId = dropDown.value;
     userName = dropDown.options[dropDown.selectedIndex].text;
   }
