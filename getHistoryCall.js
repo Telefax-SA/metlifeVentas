@@ -10,6 +10,8 @@ const client = platformClient.ApiClient.instance;
 client.setEnvironment(REGION);
 
 async function initLogin() {
+  console.warn('[initLogin] No hay access_token. Mostrando botón de login manual en lugar de redirigir automáticamente.');
+
   const contactId = urlParams.get('contactId') || '';
   const campaignId = urlParams.get('campaignId') || '';
   const participantId = urlParams.get('participantId') || '';
@@ -35,7 +37,23 @@ async function initLogin() {
 
   const state = encodeURIComponent(stateObj.toString());
   const loginUrl = await getLoginUrl(CLIENT_ID, REGION, REDIRECT_URI, state);
-  window.location.href = loginUrl;
+
+  // NO redirigir automáticamente - mostrar botón manual para poder debuggear
+  console.log('[initLogin] Login URL generada:', loginUrl);
+  try {
+    closeLoading();
+  } catch(e) {}
+  Swal.fire({
+    title: 'Sesión no iniciada',
+    text: 'No se encontró un token de acceso. Hacé clic en el botón para iniciar sesión.',
+    icon: 'info',
+    confirmButtonText: 'Iniciar Sesión',
+    allowOutsideClick: false
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = loginUrl;
+    }
+  });
 }
 
 
@@ -258,19 +276,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const code = urlParams.get('code');
 const rawState = urlParams.get('state');
 
-if (code && rawState) {
-  const stateParams = new URLSearchParams(decodeURIComponent(rawState));
-  for (const [key, value] of stateParams.entries()) {
-    localStorage.setItem(key, value); // guarda contactId, campaignId, o cualquier otro
-  }
-
-  exchangeCodeForToken(code, CLIENT_ID, REGION, REDIRECT_URI)
-    .then(() => {
-      history.replaceState(null, '', REDIRECT_URI); // limpia los parámetros de la URL
-    })
-    .catch(err => showAlert('error', 'Error en login', err.message));
-}
-
 function handleLoadError(errorContext, errorDetail) {
   console.error(`[Error de Carga] ${errorContext}:`, errorDetail);
   
@@ -307,42 +312,76 @@ if (!window.__alreadyRan) {
   }
 
   (async () => {
-    if (!code) {
-      await initLogin(); 
-    } else {
+    console.log('[INIT] Iniciando flujo de autenticación...');
+    console.log('[INIT] code:', code, '| rawState:', rawState);
+    console.log('[INIT] access_token en localStorage:', !!localStorage.getItem('access_token'));
+
+    try {
+      if (code) {
+        console.log('[INIT] Código OAuth detectado, intercambiando por token...');
+        if (rawState) {
+          const stateParams = new URLSearchParams(decodeURIComponent(rawState));
+          for (const [key, value] of stateParams.entries()) {
+            localStorage.setItem(key, value); // guarda contactId, campaignId, o cualquier otro
+          }
+        } else {
+          console.warn('[INIT] No se detectó parámetro state en la URL.');
+        }
+        showLoading('Iniciando sesión...');
+        await exchangeCodeForToken(code, CLIENT_ID, REGION, REDIRECT_URI);
+        history.replaceState(null, '', REDIRECT_URI); // limpia los parámetros de la URL
+        console.log('[INIT] Token intercambiado exitosamente.');
+        showToast('success', 'Sesión iniciada correctamente');
+      }
+
+      const token = localStorage.getItem('access_token');
+      console.log('[INIT] Token disponible:', !!token);
+      if (!token) {
+        console.warn('[INIT] No hay token. Mostrando login manual (SIN redirigir automáticamente).');
+        await initLogin();
+        return;
+      }
+
+      client.setAccessToken(token);
+      console.log('[INIT] Token seteado en el client de Genesys.');
+
       const contactId = localStorage.getItem('contactId');
       const campaignId = localStorage.getItem('campaignId');
       const userId = localStorage.getItem("userId")
       const campaingName = localStorage.getItem("campaingName")
       const pending = localStorage.getItem("pending")
       
-      try {
-        suscribirseATopic(userId);
-        await getHistoryCalls(contactId);
-        await getContactData(contactId, campaignId);
-        //await getWrapUpCodes("*");
-        await getUsersByDivision("Home");
+      console.log('[INIT] Datos de localStorage:', { contactId, campaignId, userId, campaingName, pending });
 
-        const title = document.getElementById("campanaTitle");
-        const miSelect = document.getElementById('AgenteCall');
-        if (miSelect) miSelect.value = userId;
+      suscribirseATopic(userId);
+      await getHistoryCalls(contactId);
+      await getContactData(contactId, campaignId);
+      //await getWrapUpCodes("*");
+      await getUsersByDivision("Home");
 
-        if (title) {
-          if (pending) {
-            title.innerHTML = `<span style="color:#e53935;">Pendiente de campaña ${campaingName}</span>`;
-          } else {
-            title.textContent = campaingName;
-          }
+      const title = document.getElementById("campanaTitle");
+      const miSelect = document.getElementById('AgenteCall');
+      if (miSelect) miSelect.value = userId;
+
+      if (title) {
+        if (pending) {
+          title.innerHTML = `<span style="color:#e53935;">Pendiente de campaña ${campaingName}</span>`;
+        } else {
+          title.textContent = campaingName;
         }
-        
-        // Reset retry count on successful load
-        sessionStorage.setItem('auto_refresh_retry_count', '0');
-      } catch (err) {
-        handleLoadError("Carga de datos inicial", err);
       }
+      
+      // Reset retry count on successful load
+      sessionStorage.setItem('auto_refresh_retry_count', '0');
+      console.log('[INIT] Carga completada exitosamente ✅');
+    } catch (err) {
+      console.error('[INIT] Error durante la carga inicial (SIN recarga automática):', err);
+      handleLoadError("Carga de datos inicial", err);
     }
   })();
 }
+
+
 
 // document.getElementById('Tipificar').onclick = (e) => {
 //   e.preventDefault(); 

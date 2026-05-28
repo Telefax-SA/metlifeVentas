@@ -1,0 +1,52 @@
+name: Deploy to AWS S3
+
+'on':
+  push:
+    branches:
+      - main # Se ejecuta automáticamente al hacer push o merge a la rama main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código del repositorio
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Configurar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      # 3. Instalar dependencias
+      - name: Install Dependencies
+        run: npm ci
+
+      # 4. Compilar la aplicación (genera la carpeta dist/)
+      - name: Build Application
+        run: npm run build
+
+      # 5. Configurar credenciales de AWS usando los Secrets de GitHub
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: sa-east-1 # Cambia esto por la región de tu bucket S3 si es diferente (ej: us-east-1)
+
+      # 6. Sincronizar la carpeta dist/ con el bucket S3
+      - name: Deploy to S3
+        run: |
+          aws s3 sync dist/ s3://TU-NOMBRE-DE-BUCKET-S3 --delete
+        # NOTA: Reemplaza 'TU-NOMBRE-DE-BUCKET-S3' por el nombre real de tu bucket (ej: metlife-ventas-bucket)
+        # El flag --delete elimina del bucket los archivos que ya no existan en tu carpeta dist/ local.
+
+        # 7. Opcional: Invalidar la caché de CloudFront para aplicar cambios al instante
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id TU_ID_DE_DISTRIBUCION_CLOUDFRONT --paths "/*"
+        # NOTA: Reemplaza 'TU_ID_DE_DISTRIBUCION_CLOUDFRONT' por tu ID de distribución de CloudFront real.
+        # Si no usas CloudFront o prefieres hacerlo manual, puedes borrar este paso (paso 7).

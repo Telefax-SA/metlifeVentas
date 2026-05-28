@@ -1,5 +1,5 @@
 // === CONFIGURACIÓN ===
-const CLIENT_ID = 'a55b8a1e-58b5-47f0-b954-fbad359103ef';
+const CLIENT_ID = '732d6aaf-a749-426f-8af2-7d6595c48a81';
 const REGION = 'sae1.pure.cloud';       
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 
@@ -538,8 +538,20 @@ function getLastAgentSessionId(conv) {
   }
 
   if (!localStorage.getItem('access_token')) {
+    console.warn('[logic.js] No hay access_token. Mostrando botón de login manual.');
     const loginUrl = await getLoginUrl(CLIENT_ID, REGION, REDIRECT_URI);
-    window.location.href = loginUrl;
+    try { closeLoading(); } catch(e) {}
+    Swal.fire({
+      title: 'Sesión no iniciada',
+      text: 'No se encontró un token de acceso. Hacé clic en el botón para iniciar sesión.',
+      icon: 'info',
+      confirmButtonText: 'Iniciar Sesión',
+      allowOutsideClick: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = loginUrl;
+      }
+    });
     return;
   }
 
